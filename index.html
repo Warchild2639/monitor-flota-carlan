@@ -1,109 +1,2197 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Monitor de Flota Carlan</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitor de Flota P2P</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color-scheme:dark;background:#0b1220;color:#edf3fc}
-*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#132139;border-bottom:1px solid #30435f;padding:16px max(18px,calc((100vw - 1180px)/2))}
-h1{font-size:1.4rem;margin:0}h2{font-size:1.1rem;margin:0 0 12px}h3{font-size:1rem;margin:0 0 14px}
-main{max-width:1220px;margin:28px auto;padding:0 18px 40px}.top,.between{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
-.muted{color:#a9b9cf}.small{font-size:.85rem}.oculto{display:none!important}
-.panel,.dato{background:#17263e;border:1px solid #334761;border-radius:14px;padding:20px}
-#acceso{max-width:430px;margin:55px auto}label{display:block;margin:14px 0 6px}
-input,select{background:#0c1729;color:#f0f5ff;border:1px solid #506582;border-radius:9px;padding:11px 12px;font:inherit}
-#acceso input{width:100%}button{border:0;background:#317be7;color:white;border-radius:9px;padding:11px 16px;font-weight:650;cursor:pointer}button:disabled{opacity:.6}#salir{background:#354a65}
-#estado{white-space:pre-wrap} .eyebrow{font-size:.77rem;letter-spacing:.08em;text-transform:uppercase;color:#a9b9cf}
-.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0 25px}
-.dato{min-height:112px}.dato strong{display:block;font-size:1.8rem;margin-top:10px;overflow-wrap:anywhere}.dato small{display:block;color:#b0c0d7;margin-top:7px}
-.section{margin-top:24px}.section .panel{margin-top:12px}.chip{display:inline-flex;align-items:center;border:1px solid #52647c;border-radius:99px;padding:4px 10px;font-size:.78rem;background:#25364d;white-space:nowrap}
-.ok{background:#123c32;color:#a3f2cf;border-color:#2e745d}.warn{background:#4a391e;color:#ffe1a3;border-color:#927038}.neutral{background:#29384e;color:#c6d5e8;border-color:#516580}
-.filters{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.filters input{flex:2;min-width:170px}.filters select{flex:1;min-width:145px}
-.tablewrap{overflow:auto;border:1px solid #344761;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:700px;text-align:left}
-th,td{padding:12px 13px;border-bottom:1px solid #304158;font-size:.88rem}th{background:#1d304c;color:#c6d7ef;position:sticky;top:0}tr:last-child td{border-bottom:0}tbody tr:hover{background:#1c3049}
-.empty{padding:24px;text-align:center;color:#adbed3}.note{line-height:1.5}.foot{margin-top:26px;font-size:.8rem;color:#98aac3}
-@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:9px}.dato{padding:13px;min-height:98px}.dato strong{font-size:1.35rem}header{padding:14px 16px}h1{font-size:1.1rem}.filters input,.filters select{flex:1 1 100%}}
+*{box-sizing:border-box}
+body{margin:0;background:#101827;color:#e9eef8;font-family:Segoe UI,Arial,sans-serif}
+header{padding:24px 30px;background:#182439;border-bottom:1px solid #334155}
+h1{margin:0;font-size:25px}
+header p{margin:7px 0 0;color:#aab8cb}
+main{padding:24px;max-width:1600px;margin:auto}
+.resumen{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:22px}
+.tarjeta{background:#1c2a40;border:1px solid #34445d;border-radius:12px;padding:17px;min-width:170px}
+.numero{font-size:30px;font-weight:700}
+.etiqueta{color:#b7c4d6;font-size:13px}
+.controles{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+input,select,button{background:#1c2a40;color:white;border:1px solid #455670;border-radius:8px;padding:11px;font-size:14px}
+input{min-width:220px}
+button{cursor:pointer;background:#2459a6}
+.tabla{overflow:auto;border:1px solid #34445d;border-radius:12px}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th{background:#24334b;text-align:left;font-size:13px;color:#c6d3e4;padding:13px}
+td{border-top:1px solid #304057;padding:12px;font-size:14px}
+tr:hover{background:#202e44}
+.estado{display:inline-block;padding:5px 9px;border-radius:7px;font-size:12px;font-weight:600}
+.bien{background:#164b3d;color:#8cf2c3}
+.mal{background:#603036;color:#ffb2b8}
+.neutro{background:#354257;color:#c7d1e0}
+.aviso{background:#665020;color:#ffe09a}
+#mensaje{margin:10px 0;color:#aab8cb;font-size:13px}
+.ficha{position:fixed;inset:0;background:#000b;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}
+.ficha.abierta{display:flex}
+.panel{background:#182439;border:1px solid #455670;border-radius:14px;padding:24px;width:min(760px,100%);max-height:90vh;overflow:auto}
+.panel h2{margin-top:0}
+.barra-fila{display:flex;align-items:center;gap:12px;margin:12px 0}
+.barra-nombre{width:100px;flex-shrink:0;font-size:13px}
+.barra{flex:1;display:flex;gap:3px;min-height:20px;background:#354257;border-radius:5px;overflow:hidden}
+.segmento{height:20px;flex:1;min-width:4px}
+.segmento.bien{background:#23885b}
+.segmento.mal{background:#c53b46}
+.segmento.aviso{background:#d89536}
+.segmento.neutro{background:#64748b}
+.detalle{color:#aab8cb;font-size:13px;margin-top:15px}
+.cerrar{float:right}
+.navegacion-lineas{
+ display:flex;align-items:center;justify-content:center;
+ gap:18px;margin:0 0 20px;padding:16px;
+ background:#1c2a40;border:1px solid #34445d;
+ border-radius:12px
+}
+.navegacion-lineas button{
+ font-size:23px;min-width:58px;padding:10px
+}
+.linea-actual{
+ min-width:170px;text-align:center;
+ font-size:25px;font-weight:700
+}
+.linea-actual small{
+ display:block;font-size:12px;
+ font-weight:400;color:#aab8cb;margin-bottom:5px
+}
+
+.barra-empresas{
+ display:flex;align-items:center;gap:8px;
+ overflow-x:auto;white-space:nowrap;
+ padding:14px;margin-bottom:18px;
+ background:#1c2a40;border:1px solid #34445d;
+ border-radius:12px
+}
+.boton-linea{
+ flex:0 0 auto;min-width:55px;padding:11px 15px;
+ font-weight:700;border:2px solid transparent;
+ border-radius:9px
+}
+.boton-linea:hover{filter:brightness(1.2)}
+.boton-linea.activo{
+ border-color:white;box-shadow:0 0 0 2px #ffffff30
+}
+.boton-linea.guido{background:#245fad}
+.boton-linea.sanvicente{background:#16836d}
+.boton-linea.linea514{background:#9a702c}
+.boton-linea.varela{background:#8055a9}
+.boton-linea.todas{background:#455670}
+.separador-empresa{
+ width:1px;height:29px;background:#64748b;
+ margin:0 5px;flex:0 0 auto
+}
+
+
+/* V6: barra horizontal de ancho completo */
+.barra-empresas{
+ width:100%;
+ display:flex;
+ align-items:stretch;
+ justify-content:space-between;
+ gap:6px;
+ overflow-x:auto;
+}
+.barra-empresas .boton-linea{
+ flex:1 1 0;
+ min-width:65px;
+ text-align:center;
+}
+.barra-empresas .separador-empresa{
+ flex:0 0 1px;
+ margin:0 2px;
+ align-self:center;
+}
+
 </style>
+
+<style>
+.hdd-etiqueta {
+    display:inline-block;
+    min-width:105px;
+    padding:6px 10px;
+    border-radius:7px;
+    font-size:12px;
+    font-weight:700;
+    text-align:center;
+}
+.hdd-ok { background:#168447; color:#fff; }
+.hdd-sin-datos { background:#f4cf46; color:#161616; }
+.hdd-error { background:#e67e22; color:#fff; }
+.hdd-falla { background:#c62828; color:#fff; }
+.hdd-pendiente { background:#45556c; color:#fff; }
+.hdd-fecha { display:block; margin-top:4px; font-size:11px; color:#aab8cb; }
+</style>
+<style>
+body:not(.carlan-autorizado)>:not(#carlan-acceso){display:none!important}
+#carlan-acceso{position:fixed;inset:0;z-index:999999;background:#101827;color:#e9eef8;display:flex;align-items:center;justify-content:center;padding:20px;font-family:Segoe UI,Arial,sans-serif}
+body.carlan-autorizado #carlan-acceso{display:none}
+#carlan-acceso .login{max-width:420px;width:100%;background:#1c2a40;border:1px solid #455670;border-radius:14px;padding:26px}
+#carlan-acceso input{display:block;width:100%;margin:10px 0;padding:12px}
+#carlan-acceso button{margin-top:8px}
+#carlan-salir{position:fixed;right:15px;bottom:15px;z-index:9998;background:#34445d}
+#carlan-nota{background:#3a301c;border:1px solid #8b713b;padding:10px 15px;border-radius:8px;margin-bottom:14px;color:#ffe6ae}
+</style>
+<script>
+(function(){
+const nativeFetch=window.fetch.bind(window);
+let snapshot=null;let waiting=[];
+function emit(){const callbacks=waiting;waiting=[];for(const f of callbacks)f()}
+window.__carlanSetData=function(data){snapshot=data||{};emit();window.dispatchEvent(new Event("carlan-datos"))};
+window.__carlanClear=function(){snapshot=null};
+window.fetch=function(input,opts){
+ const path=typeof input==="string"?input:input?.url;
+ if(!path||!path.startsWith("/api/"))return nativeFetch(input,opts);
+ return new Promise(resolve=>{
+  const go=()=>{
+   const d=snapshot||{};
+   let payload=null;
+   if(path.startsWith("/api/flota"))payload=d.flota||d.colectivos||[];
+   else if(path.startsWith("/api/progreso_barrido"))payload=d;
+   else if(path.startsWith("/api/hdd"))payload=d.hdd||{};
+   else if(path.startsWith("/api/internet"))payload=d.internet||{estado:"VERIFICANDO"};
+   else if(path.startsWith("/api/historial"))payload=d.historial||{internet:[],servidor:[]};
+   else if(path.startsWith("/api/ubicacion")){const id=new URL(path,location.origin).searchParams.get("interno");payload=d.ubicaciones?.[id]||{}}
+   else if(path.startsWith("/api/ficha_historica")){const id=new URL(path,location.origin).searchParams.get("interno");payload=d.fichas?.[id]||{interno:id,componentes:{},eventos:{},advertencias:[]}}
+   resolve(new Response(JSON.stringify(payload),{status:200,headers:{"Content-Type":"application/json"}}));
+  };
+  if(snapshot!==null)go();else waiting.push(go);
+ });
+};
+})();
+</script>
 </head>
 <body>
-<header><div class="top"><h1>🚌 Monitor de Flota Carlan</h1><button id="salir" class="oculto">Cerrar sesión</button></div></header>
-<main>
-<section id="acceso" class="panel"><h2>Acceso autorizado</h2><p class="muted">Ingresá con tu usuario de Firebase.</p>
-<form id="formulario"><label for="correo">Correo electrónico</label><input id="correo" type="email" autocomplete="username" required>
-<label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password" required>
-<button id="entrar" type="submit">Ingresar</button></form><p id="estado" role="status"></p></section>
-<section id="monitor" class="oculto">
-<div class="between"><div><span class="eyebrow">Panel de operaciones</span><h2 style="margin:6px 0">Estado de la flota</h2><p class="muted small" id="actualizacion" aria-live="polite">Esperando datos del servidor...</p></div><span class="chip" id="conexion">Conectando...</span></div>
-<div class="grid" aria-label="Resumen del barrido">
-<div class="dato"><span class="muted small">Colectivos revisados</span><strong id="completados">—</strong><small>Progreso del barrido</small></div>
-<div class="dato"><span class="muted small">Último interno revisado</span><strong id="ultimo">—</strong><small>Último procesado</small></div>
-<div class="dato"><span class="muted small">Estado del barrido</span><strong id="barrido" style="font-size:1.05rem">—</strong><small>Estado del motor</small></div>
-<div class="dato"><span class="muted small">Internos con detalle</span><strong id="conDetalle">—</strong><small>Registros publicados</small></div>
+<div id="carlan-acceso"><div class="login"><h2>🚌 Monitor de Flota Carlan</h2><p>Acceso autorizado</p><form id="carlan-form"><input id="carlan-email" type="email" placeholder="Correo electrónico" autocomplete="username" required><input id="carlan-password" type="password" placeholder="Contraseña" autocomplete="current-password" required><button type="submit">Ingresar</button></form><p id="carlan-error" role="status">Comprobando sesión...</p></div></div>
+<!-- PANEL DE HISTORIAL V6.6 -->
+<style>
+.cabecera-historial-integrada {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 15px;
+    position: relative;
+}
+#panel-historial-cortes {
+    position: relative;
+    top: auto;
+    right: auto;
+    z-index: 10000;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+}
+#boton-historial {
+    background: #263544;
+    color: white;
+    border: 1px solid #526476;
+    border-radius: 8px;
+    padding: 10px 15px;
+    cursor: pointer;
+    font-weight: bold;
+    box-shadow: 0 3px 10px rgba(0,0,0,.25);
+}
+#contenido-historial {
+    display: none;
+    position: absolute;
+    top: 46px;
+    right: 0;
+    width: min(390px, calc(100vw - 30px));
+    max-height: 75vh;
+    overflow-y: auto;
+    background: #ffffff;
+    color: #25313b;
+    border: 1px solid #bdc6ce;
+    border-radius: 10px;
+    box-shadow: 0 8px 28px rgba(0,0,0,.3);
+    padding: 14px;
+    box-sizing: border-box;
+}
+#contenido-historial.abierto {
+    display: block;
+}
+#filtros-historial {
+    display: flex;
+    gap: 6px;
+    margin: 12px 0;
+}
+#filtros-historial button {
+    flex: 1;
+    border: 1px solid #b9c3cd;
+    background: #f1f4f7;
+    border-radius: 5px;
+    padding: 7px 3px;
+    cursor: pointer;
+    color: #25313b;
+}
+#filtros-historial button.activo {
+    background: #263544;
+    color: #ffffff;
+}
+.evento-historial {
+    border-bottom: 1px solid #e2e6ea;
+    padding: 11px 2px;
+}
+.evento-historial strong {
+    display: block;
+    margin-bottom: 5px;
+}
+.evento-historial small {
+    display: block;
+    color: #586573;
+    line-height: 1.6;
+}
+#lista-historial {
+    min-height: 60px;
+}
+</style>
+
+
+<style>
+#contenido-historial {
+    width: min(510px, calc(100vw - 30px));
+}
+.historial-subtitulo,
+.nota-historial {
+    font-size: 11px;
+    color: #65717d;
+}
+.historial-subtitulo {
+    margin: 5px 0 12px;
+}
+.resumen-cortes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+.indicador-corte {
+    padding: 12px 5px;
+    text-align: center;
+    background: #eef2f6;
+    border: 1px solid #d9e0e7;
+    border-radius: 8px;
+}
+.indicador-corte span {
+    display: block;
+    font-size: 11px;
+    color: #526171;
+}
+.indicador-corte strong {
+    display: block;
+    font-size: 25px;
+    margin-top: 5px;
+}
+.titulo-grafico {
+    font-weight: bold;
+    margin: 17px 0 8px;
+}
+#grafico-cortes {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 145px;
+    padding: 12px 5px 6px;
+    background: #f6f8fa;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.dia-grafico {
+    flex: 1;
+    min-width: 2px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.barra-internet {
+    background: #3484c5;
+}
+.barra-servidor {
+    background: #c65058;
+}
+.barra-internet,
+.barra-servidor {
+    width: 100%;
+    min-height: 0;
+}
+.leyenda-grafico {
+    display: flex;
+    gap: 16px;
+    font-size: 11px;
+    margin-top: 8px;
+}
+.leyenda-grafico span::before {
+    content: "";
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 5px;
+    border-radius: 2px;
+}
+.leyenda-internet::before {
+    background: #3484c5;
+}
+.leyenda-servidor::before {
+    background: #c65058;
+}
+#ver-detalles-cortes {
+    width: 100%;
+    margin-top: 14px;
+    padding: 10px;
+    border: 1px solid #9eacba;
+    border-radius: 7px;
+    background: #263544;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+}
+#seccion-detalles-cortes[hidden] {
+    display: none;
+}
+.nota-historial {
+    margin-bottom: 0;
+}
+</style>
+
+
+<style>
+#grafico-cortes {
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    height: 205px;
+    padding: 15px 12px 8px;
+    overflow-x: auto;
+    box-sizing: border-box;
+    background: #f6f8fa;
+    border-radius: 8px;
+}
+.grupo-dia-claro {
+    flex: 1 0 48px;
+    min-width: 48px;
+    max-width: 85px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.barras-dia-claro {
+    width: 100%;
+    height: 155px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 5px;
+}
+.contenedor-barra-clara {
+    width: 18px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+}
+.barra-clara {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    flex-shrink: 0;
+}
+.numero-barra-clara {
+    font-size: 12px;
+    font-weight: bold;
+    color: #273747;
+    margin-bottom: 4px;
+}
+.fecha-dia-claro {
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    color: #526171;
+}
+.grafico-sin-incidentes {
+    width: 100%;
+    align-self: center;
+    text-align: center;
+    color: #65717d;
+    font-size: 13px;
+}
+</style>
+
+<!-- FIN PANEL DE HISTORIAL V6.6 -->
+<style>
+#aviso-internet {
+    display: none;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    padding: 15px 20px;
+    background: #a61c1c;
+    color: #ffffff;
+    border-bottom: 3px solid #ffb3b3;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    box-shadow: 0 3px 12px rgba(0,0,0,.25);
+}
+#aviso-internet strong {
+    display: block;
+    font-size: 19px;
+    letter-spacing: .5px;
+}
+#aviso-internet .detalle {
+    margin-top: 5px;
+    font-size: 13px;
+}
+#estado-internet-pequeno {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    text-align: right;
+    padding: 5px 12px;
+    color: #666;
+}
+</style>
+<div id="aviso-internet" role="alert">
+    <strong>⚠ SERVIDOR SIN INTERNET</strong>
+    <div class="detalle">
+        No se pueden consultar los grabadores remotos.
+        Las verificaciones deberán reintentarse cuando vuelva la conexión.
+    </div>
 </div>
-<div class="section"><h2>Diagnósticos</h2><div class="grid">
-<div class="dato"><span class="muted small">Conectividad confirmada</span><strong id="online">—</strong><small>ONLINE</small></div>
-<div class="dato"><span class="muted small">Conectividad no verificada</span><strong id="sinConexion">—</strong><small>No equivale a desconectado</small></div>
-<div class="dato"><span class="muted small">GPS obtenido</span><strong id="gpsOk">—</strong><small>GPS_OK</small></div>
-<div class="dato"><span class="muted small">Consulta HDD completada</span><strong id="hddOk">—</strong><small>LECTURA_OK, no confirma salud</small></div>
-</div></div>
-<div class="section"><div class="between"><h2>Consulta por colectivo</h2><span id="cantidadFiltrada" class="muted small"></span></div>
-<div class="filters"><input id="buscar" type="search" placeholder="Buscar interno (ej. 5762)" aria-label="Buscar por interno">
-<select id="filtroConexion" aria-label="Filtrar conectividad"><option value="">Toda conectividad</option><option value="ONLINE">ONLINE</option><option value="NO_VERIFICADO">No verificada</option></select>
-<select id="filtroGps" aria-label="Filtrar GPS"><option value="">Todos los GPS</option><option value="GPS_OK">GPS obtenido</option><option value="LOGIN_OK_SIN_GPS">Sin GPS obtenido</option><option value="NO_VERIFICADO">No verificado</option><option value="TIEMPO_AGOTADO">Tiempo agotado</option></select>
-<select id="filtroHdd" aria-label="Filtrar HDD"><option value="">Todos los HDD</option><option value="LECTURA_OK">Consulta completada</option><option value="ERROR_DIAGNOSTICO">Error de diagnóstico</option><option value="NO_VERIFICADO">No verificado</option></select></div>
-<div class="tablewrap"><table><thead><tr><th>Interno</th><th>Conectividad</th><th>GPS</th><th>HDD</th><th>Última consulta</th></tr></thead><tbody id="filas"><tr><td colspan="5" class="empty">Esperando registros individuales del servidor.</td></tr></tbody></table></div></div>
-<div class="section panel note"><h3>Cómo interpretar los estados</h3><p class="muted small"><strong>ONLINE</strong> significa que se confirmó inicio de sesión o túnel. <strong>NO_VERIFICADO</strong> no demuestra que el colectivo esté desconectado. <strong>LECTURA_OK</strong> indica que la consulta HDD terminó, pero no confirma por sí sola que el disco esté sano. <strong>ERROR_DIAGNOSTICO</strong> indica una consulta no completada; no debe interpretarse como una falla física del HDD.</p></div>
-<p class="foot">Panel de consulta. Los resultados representan la última información publicada por el servidor y no necesariamente el estado instantáneo de cada equipo.</p>
+<div id="estado-internet-pequeno">
+    Internet: verificando...
+</div>
+<header class="cabecera-historial-integrada">
+<h1>Monitor de Flota P2P</h1>
+<div id="ultimo-interno-revisado" style="font-size:13px;margin:6px 0 10px;color:#64748b">
+  Último interno revisado: <strong id="numero-ultimo-interno">—</strong>
+</div>
+<p>Monitor web · Firebase</p>
+
+<div id="panel-historial-cortes">
+    <button id="boton-historial" type="button"
+            aria-expanded="false" aria-controls="contenido-historial">
+        &#128340; Historial de cortes
+    </button>
+
+    <div id="contenido-historial">
+    <strong>Resumen de interrupciones</strong>
+    <p class="historial-subtitulo">Ultimos 30 dias</p>
+
+    <div class="resumen-cortes">
+        <div class="indicador-corte">
+            <span>Internet</span>
+            <strong id="total-cortes-internet">0</strong>
+        </div>
+        <div class="indicador-corte">
+            <span>Inesperadas</span>
+            <strong id="total-cortes-inesperados">0</strong>
+        </div>
+        <div class="indicador-corte">
+            <span>Apagados</span>
+            <strong id="total-apagados-normales">0</strong>
+        </div>
+    </div>
+
+    <div class="titulo-grafico">Interrupciones por dia</div>
+
+    <div id="grafico-cortes"
+         aria-label="Grafico de interrupciones">
+        Esperando datos...
+    </div>
+
+    <div class="leyenda-grafico">
+        <span class="leyenda-internet">Internet</span>
+        <span class="leyenda-servidor">Servidor</span>
+    </div>
+
+    <button id="ver-detalles-cortes"
+            type="button"
+            aria-expanded="false"
+            aria-controls="seccion-detalles-cortes">
+        Ver detalles de los cortes
+    </button>
+
+    <div id="seccion-detalles-cortes" hidden>
+        <div id="filtros-historial">
+            <button type="button" data-filtro="todos" class="activo">Todos</button>
+            <button type="button" data-filtro="internet">Internet</button>
+            <button type="button" data-filtro="servidor">Servidor</button>
+        </div>
+
+        <div id="lista-historial">
+            Cargando historial...
+        </div>
+    </div>
+
+    <p class="nota-historial">
+        Un reinicio inesperado no confirma un corte electrico.
+    </p>
+</div>
+</div>
+
+</header>
+<main>
+<div id="carlan-nota">Los datos de la flota, cámaras y mapa se mostrarán cuando el servidor publique sus registros individuales en Firebase. Por ahora solo está disponible el progreso del barrido.</div>
+<section class="resumen">
+<div class="tarjeta"><div class="numero" id="total">—</div><div class="etiqueta">Colectivos activos</div></div>
+<div class="tarjeta"><div class="numero" id="diagnosticados">—</div><div class="etiqueta">Con diagnóstico</div></div>
+<div class="tarjeta"><div class="numero" id="sinDatos">—</div><div class="etiqueta">Sin diagnóstico</div></div>
 </section>
+
+
+<style>
+/* CENTRO ALERTAS DESPLEGABLE V614 PASO 493B */
+#centroAlertasV614 {
+    margin: 0 0 16px;
+    background: #1c2a40;
+    border: 1px solid #34445d;
+    border-radius: 12px;
+    color: #e8eef8;
+    overflow: hidden;
+}
+#centroAlertasV614 > summary {
+    cursor: pointer;
+    padding: 15px 18px;
+    font-weight: 700;
+    list-style: none;
+}
+#centroAlertasV614 > summary::-webkit-details-marker {
+    display: none;
+}
+#centroAlertasV614 > summary::after {
+    content: "▼";
+    float: right;
+    color: #aab8cb;
+}
+#centroAlertasV614[open] > summary::after {
+    content: "▲";
+}
+#alertasGridV614 {
+    display: grid;
+    grid-template-columns: repeat(4,minmax(0,1fr));
+    gap: 10px;
+    padding: 0 14px 14px;
+}
+#alertasGridV614 button {
+    text-align: left;
+    background: #24354e;
+    border: 1px solid #455670;
+    padding: 13px;
+    border-radius: 10px;
+    color: #e8eef8;
+    cursor: pointer;
+}
+#alertasGridV614 button.activo {
+    outline: 2px solid #8bb8ff;
+}
+#alertasGridV614 .cantidad {
+    display: block;
+    font-size: 26px;
+    font-weight: 800;
+    margin-bottom: 5px;
+}
+#alertasGridV614 .descripcion {
+    font-size: 12px;
+    color: #c8d5e6;
+}
+#limpiarAlertaV614 {
+    margin: 0 14px 14px;
+    padding: 9px 14px;
+    border-radius: 8px;
+    background: #455670;
+    color: white;
+    cursor: pointer;
+}
+#notaAlertasV614 {
+    color: #aab8cb;
+    font-size: 12px;
+    padding: 0 14px 14px;
+}
+@media(max-width:700px) {
+    #alertasGridV614 {
+        grid-template-columns: repeat(2,minmax(0,1fr));
+    }
+}
+</style>
+
+
+<style>
+/* PASO 495D - ESTILOS DE ALERTAS DOBLES */
+#alertasGridV614 .alertaDobleV614 {
+    background: #24354e;
+    border: 1px solid #455670;
+    border-radius: 10px;
+    padding: 12px;
+    min-width: 0;
+}
+#alertasGridV614 .alertaDobleV614 strong {
+    display: block;
+    margin-bottom: 10px;
+    color: #edf3fc;
+}
+#alertasGridV614 .alertaDobleV614 button {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+    padding: 8px;
+    margin: 3px 0;
+    background: #1c2b42;
+    font-size: 12px;
+}
+#alertasGridV614 .alertaDobleV614 button .cantidad {
+    margin: 0;
+    font-size: 23px;
+}
+#alertasGridV614 button[data-tipo="falla"] .cantidad {
+    color: #fb8585;
+}
+#alertasGridV614 button[data-tipo="sinverificar"] .cantidad {
+    color: #f4c66c;
+}
+</style>
+
+<style>
+/* PASO 490 - BARRA FIJA Y TABLA SIN LINEA */
+main > .barra-empresas {
+    position: sticky;
+    top: 0;
+    z-index: 8;
+    box-sizing: border-box;
+    background: #1c2a40;
+    box-shadow: 0 5px 14px rgba(0,0,0,.35);
+}
+
+main > .barra-empresas .boton-linea {
+    flex-shrink: 0;
+}
+</style>
+
+<div class="barra-empresas">
+ <button class="boton-linea guido" data-linea="271">271</button>
+ <button class="boton-linea guido" data-linea="373">373</button>
+ <button class="boton-linea guido" data-linea="384">384</button>
+ <span class="separador-empresa"></span>
+ <button class="boton-linea sanvicente" data-linea="177">177</button>
+ <button class="boton-linea sanvicente" data-linea="263">263</button>
+ <button class="boton-linea sanvicente" data-linea="79">79</button>
+ <span class="separador-empresa"></span>
+ <button class="boton-linea linea514" data-linea="514">514</button>
+ <span class="separador-empresa"></span>
+ <button class="boton-linea varela" data-linea="VARELA">Varela</button>
+ <span class="separador-empresa"></span>
+ <button class="boton-linea todas" data-linea="">Todas</button>
+</div>
+
+<!-- PASO 498 - CENTRO DE ALERTAS DEBAJO DE LINEAS -->
+<details id="centroAlertasV614">
+  <summary>⚠ Centro de alertas — <span id="alcanceAlertasV614">Línea seleccionada</span></summary>
+  
+  <!-- PASO 495D - ALERTAS DOBLES -->
+  <div id="alertasGridV614">
+    <div class="alertaDobleV614">
+      <strong>DVR</strong>
+      <button type="button" data-alerta="dvr" data-tipo="falla"><span class="cantidad" id="alertaDVRV614">—</span> Fallas</button>
+      <button type="button" data-alerta="dvr" data-tipo="sinverificar"><span class="cantidad" id="alertaDVRSinV614">—</span> Sin verificar</button>
+    </div>
+    <div class="alertaDobleV614">
+      <strong>GPS</strong>
+      <button type="button" data-alerta="gps" data-tipo="falla"><span class="cantidad" id="alertaGPSV614">—</span> Fallas</button>
+      <button type="button" data-alerta="gps" data-tipo="sinverificar"><span class="cantidad" id="alertaGPSSinV614">—</span> Sin verificar</button>
+    </div>
+    <div class="alertaDobleV614">
+      <strong>Cámaras</strong>
+      <button type="button" data-alerta="camaras" data-tipo="falla"><span class="cantidad" id="alertaCamarasV614">—</span> Fallas</button>
+      <button type="button" data-alerta="camaras" data-tipo="sinverificar"><span class="cantidad" id="alertaCamarasSinV614">—</span> Sin verificar</button>
+    </div>
+    <div class="alertaDobleV614">
+      <strong>HDD</strong>
+      <button type="button" data-alerta="hdd" data-tipo="falla"><span class="cantidad" id="alertaHDDV614">—</span> Fallas confirmadas</button>
+      <button type="button" data-alerta="hdd" data-tipo="sinverificar"><span class="cantidad" id="alertaHDDSinV614">—</span> Sin verificar</button>
+    </div>
+  </div>
+<button type="button" id="limpiarAlertaV614">Quitar filtro de alerta</button>
+  <div id="notaAlertasV614">Últimos diagnósticos disponibles. Los estados antiguos no confirman una falla actual. Sin datos no equivale a falla.</div>
+</details>
+
+<div class="controles">
+<input id="buscar" placeholder="Buscar interno...">
+<select id="linea" style="display:none"></select>
+<button id="actualizar">Actualizar datos</button>
+</div>
+<div id="mensaje"></div>
+<div class="tabla">
+<table>
+<thead><tr>
+<th>Interno</th><th>DVR</th><th>GPS</th>
+<th>Cámaras</th><th>HDD</th><th>Última verificación</th><th>Vigencia</th>
+</tr></thead>
+<tbody id="filas"></tbody>
+</table>
+</div>
 </main>
+<div id="ficha" class="ficha">
+<div class="panel">
+<button class="cerrar" id="cerrarFicha">Cerrar</button>
+<h2 id="tituloFicha"></h2>
+<p id="subtituloFicha"></p>
+<style>
+/* V6.13 - Ficha historica compacta */
+#historicosFicha .historicos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    margin: 14px 0 18px;
+}
+
+#historicosFicha .historico-tarjeta {
+    box-sizing: border-box;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid rgba(150,160,175,.28);
+    border-radius: 10px;
+    background: rgba(120,135,155,.055);
+}
+
+#historicosFicha .historico-nombre {
+    font-size: 12px;
+    opacity: .75;
+    margin-bottom: 5px;
+}
+
+#historicosFicha .historico-valor {
+    font-size: 14px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+#historicosFicha .historico-fecha {
+    font-size: 11px;
+    opacity: .75;
+    margin-top: 7px;
+    overflow-wrap: anywhere;
+}
+
+#historicosFicha .historico-nota {
+    font-size: 12px;
+    opacity: .8;
+    line-height: 1.45;
+}
+
+#barrasFicha::before {
+    content: "Historial de verificaciones";
+    display: block;
+    font-weight: 700;
+    margin: 12px 0;
+}
+
+#detalleFicha {
+    margin-top: 18px;
+    padding: 12px;
+    border: 1px solid rgba(150,160,175,.28);
+    border-radius: 10px;
+    overflow-wrap: anywhere;
+}
+
+#detalleFicha::before {
+    content: "Diagnostico HDD";
+    display: block;
+    font-weight: 700;
+    margin-bottom: 7px;
+}
+
+@media (max-width: 650px) {
+    #historicosFicha .historicos-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    #historicosFicha .historico-tarjeta {
+        padding: 10px;
+    }
+
+    #historicosFicha .historico-valor {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    #historicosFicha .historicos-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+</style>
+
+<!-- INDICADORES COMPACTOS V6.14 -->
+<style>
+#indicadoresCompactos{padding:15px;margin:12px 0;background:#1c2b42;border:1px solid #41536c;border-radius:12px}
+.indicador-fila{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid #34445d}
+.indicador-fila:last-child{border-bottom:0}
+.indicador-nombre{font-weight:600}
+.indicador-contenido{display:flex;align-items:center;gap:8px;font-size:12px;color:#c7d1e0}
+.indicador-punto{width:15px;height:15px;border-radius:50%;display:inline-block;border:1px solid #ffffff40;flex-shrink:0}
+.indicador-punto.verde{background:#26c778}
+.indicador-punto.rojo{background:#e74c57}
+.indicador-punto.amarillo{background:#e8b548}
+.indicador-punto.gris{background:#718096}
+.indicadores-camaras{display:flex;gap:18px}
+.indicador-camara{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px}
+#historialFichaDesplegable{margin:15px 0;border:1px solid #41536c;border-radius:10px;padding:12px}
+#historialFichaDesplegable summary{cursor:pointer;font-weight:700}
+@media(max-width:420px){.indicadores-camaras{gap:11px}.indicador-fila{gap:8px}}
+</style>
+
+<style>
+/* DISTRIBUCION LATERAL GPS V6.14 */
+#filaIndicadoresMapaV614 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 14px;
+    align-items: stretch;
+    margin: 12px 0;
+}
+#filaIndicadoresMapaV614 #indicadoresCompactos {
+    margin: 0;
+    min-width: 0;
+}
+#filaIndicadoresMapaV614 #ubicacionGPSFicha {
+    margin: 0;
+    min-width: 0;
+    padding: 12px;
+}
+#filaIndicadoresMapaV614 #ubicacionGPSFicha h3 {
+    font-size: 13px;
+}
+#filaIndicadoresMapaV614 #estadoUbicacionGPS {
+    font-size: 11px;
+}
+#filaIndicadoresMapaV614 #mapaGPSFicha {
+    width: 100%;
+    max-width: 100%;
+    height: 150px;
+}
+#filaIndicadoresMapaV614 #mapaGPSFicha.ampliado {
+    height: 310px;
+}
+@media (max-width: 650px) {
+    #filaIndicadoresMapaV614 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+</style>
+
+<style>
+/* TARJETAS COMPACTAS IGUALES V6.14 */
+#filaIndicadoresMapaV614 {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 250px;
+    gap: 14px;
+    align-items: stretch;
+}
+
+#filaIndicadoresMapaV614 > #indicadoresCompactos,
+#filaIndicadoresMapaV614 > #ubicacionGPSFicha {
+    box-sizing: border-box;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+}
+
+#filaIndicadoresMapaV614 #ubicacionGPSFicha {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 10px;
+}
+
+#filaIndicadoresMapaV614 #ubicacionGPSFicha h3 {
+    font-size: 13px;
+    margin: 0;
+}
+
+#filaIndicadoresMapaV614 #estadoUbicacionGPS {
+    font-size: 11px;
+    line-height: 1.3;
+    margin: 0;
+}
+
+#filaIndicadoresMapaV614 .instruccion-mapa,
+#filaIndicadoresMapaV614 #enlaceGPSFicha {
+    display: none !important;
+}
+
+#filaIndicadoresMapaV614 #mapaGPSFicha {
+    width: 100%;
+    max-width: 100%;
+    height: 125px;
+    min-height: 125px;
+    flex: 1 1 125px;
+    box-sizing: border-box;
+}
+
+#filaIndicadoresMapaV614 #mapaGPSFicha.ampliado {
+    height: 310px;
+    flex: 1 1 310px;
+}
+
+@media (max-width: 650px) {
+    #filaIndicadoresMapaV614 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #filaIndicadoresMapaV614 > #indicadoresCompactos,
+    #filaIndicadoresMapaV614 > #ubicacionGPSFicha {
+        height: auto;
+    }
+}
+</style>
+
+<div id="filaIndicadoresMapaV614">
+<div id="indicadoresCompactos">
+  <div class="indicador-fila">
+    <span class="indicador-nombre">DVR / Conexion</span>
+    <div class="indicador-contenido" id="indicadorDVR"></div>
+  </div>
+  <div class="indicador-fila">
+    <span class="indicador-nombre">GPS</span>
+    <div class="indicador-contenido" id="indicadorGPS"></div>
+  </div>
+  <div class="indicador-fila">
+    <span class="indicador-nombre">Camaras</span>
+    <div class="indicadores-camaras" id="indicadoresCamaras"></div>
+  </div>
+</div>
+<div id="ubicacionGPSFicha">
+  <h3>Última ubicación GPS registrada</h3>
+  <div id="estadoUbicacionGPS">Consultando ubicación almacenada...</div>
+  <div id="mapaGPSFicha" title="Clic para ampliar o reducir"></div>
+<div class="instruccion-mapa">Hacé clic en el mapa para ampliarlo o reducirlo.</div>
+  <a id="enlaceGPSFicha" target="_blank" rel="noopener noreferrer">
+    Abrir ubicación en OpenStreetMap
+  </a>
+</div>
+</div>
+
+<!-- MINIMAPA GPS V6.14 -->
+<style>
+#ubicacionGPSFicha{
+  margin:15px 0;
+  padding:14px;
+  border:1px solid #41536c;
+  border-radius:12px;
+  background:#1c2b42;
+}
+#ubicacionGPSFicha h3{margin:0 0 10px;font-size:16px}
+#estadoUbicacionGPS{font-size:12px;color:#c7d1e0;margin-bottom:10px;line-height:1.6}
+#mapaGPSFicha{
+  height:230px;
+  width:100%;
+  border-radius:9px;
+  overflow:hidden;
+  background:#26354a;
+  display:none;
+}
+#enlaceGPSFicha{
+  display:none;
+  margin-top:10px;
+  font-size:12px;
+}
+</style>
+<style>
+
+/* MINIMAPA EXPANDIBLE V6.14 */
+#mapaGPSFicha {
+    width: 220px;
+    max-width: 100%;
+    height: 150px;
+    cursor: zoom-in;
+    transition: width .25s ease, height .25s ease;
+    border: 1px solid #52647c;
+    box-sizing: border-box;
+}
+#mapaGPSFicha.ampliado {
+    width: 100%;
+    height: 360px;
+    cursor: zoom-out;
+}
+#ubicacionGPSFicha .instruccion-mapa {
+    font-size: 11px;
+    color: #aab8cb;
+    margin-top: 7px;
+}
+@media(max-width:500px) {
+    #mapaGPSFicha.ampliado {
+        height: 270px;
+    }
+}
+
+</style>
+
+
+<details id="historialFichaDesplegable">
+  <summary>Ver historial de verificaciones</summary>
+  <div id="historicosFicha"></div>
+  <div id="barrasFicha"></div>
+</details>
+
+<div class="detalle" id="detalleFicha"></div>
+</div>
+</div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+let datos=[];
+let resultadosHDD={};
+function claseEstado(valor){
+ if(["ONLINE","OK","VIDEO_NORMAL"].includes(valor))return "bien";
+ if(["LOGIN_O_SESION_FALLIDA","PANTALLA_NEGRA"].includes(valor))return "mal";
+ if(valor==="SIN_VIDEO")return "aviso";
+ return "neutro";
+}
+
+
+function formatoFechaHistorica(valor){
+  if(!valor)return "Sin fecha";
+  const fecha=new Date(valor);
+  return Number.isNaN(fecha.getTime())
+    ? valor : fecha.toLocaleString("es-AR");
+}
+
+function clasificarHistorico(valor){
+  const v=String(valor||"").toUpperCase();
+  if(["ONLINE","OK","VIDEO_NORMAL"].includes(v))return "bien";
+  if(["PANTALLA_NEGRA","SIN_VIDEO"].includes(v))return "aviso";
+  return "neutro";
+}
+
+async function cargarFichaHistorica(interno){
+  const destino=document.getElementById("historicosFicha");
+  destino.textContent="Cargando verificaciones historicas...";
+
+  try{
+    const respuesta=await fetch(
+      "/api/ficha_historica?interno="+encodeURIComponent(interno),
+      {cache:"no-store"}
+    );
+    if(!respuesta.ok)throw new Error("HTTP "+respuesta.status);
+    const datos=await respuesta.json();
+
+    if(!document.getElementById("ficha").classList.contains("abierta"))
+      return;
+    const tituloActual =
+      document.getElementById("tituloFicha").textContent;
+    const internoActual =
+      tituloActual.match(/^Interno\s+(\d+)/);
+
+    if(!internoActual || internoActual[1]!==String(interno))
+      return;
+
+    destino.replaceChildren();
+
+    const fechas = Object.values(datos.componentes || {})
+      .map(e => e.fecha)
+      .filter(Boolean)
+      .sort();
+
+    document.getElementById("subtituloFicha").textContent =
+      fechas.length
+        ? "Ultima verificacion historica: " +
+          formatoFechaHistorica(fechas[fechas.length-1]) +
+          " | No indica estado actual"
+        : "Sin verificaciones historicas de DVR, GPS o camaras";
+
+    const titulo=document.createElement("h3");
+    titulo.textContent="Ultimas verificaciones registradas";
+    destino.appendChild(titulo);
+
+    const nota=document.createElement("p");
+    nota.className="historico-nota";
+    nota.textContent=
+      "Estos resultados son historicos, no estados en tiempo real. "+
+      "Un colectivo sin comunicacion puede estar apagado o estacionado.";
+    destino.appendChild(nota);
+
+    const nombres=[
+      ["DVR","DVR"],["GPS","GPS"],
+      ["CAMARA 1","Camara 1"],["CAMARA 2","Camara 2"],
+      ["CAMARA 3","Camara 3"],["CAMARA 4","Camara 4"]
+    ];
+
+    const cuadricula=document.createElement("div");
+    cuadricula.className="historicos-grid";
+    destino.appendChild(cuadricula);
+
+    const barras=document.getElementById("barrasFicha");
+    barras.replaceChildren();
+
+    for(const [clave,nombre] of nombres){
+      const ultimo=(datos.componentes||{})[clave];
+
+      const fila=document.createElement("div");
+      fila.className="historico-tarjeta";
+
+      const nombreElemento=document.createElement("div");
+      nombreElemento.className="historico-nombre";
+      nombreElemento.textContent=nombre;
+      fila.appendChild(nombreElemento);
+
+      const encabezado=document.createElement("div");
+      encabezado.className="historico-valor";
+      encabezado.textContent=ultimo
+        ? String(ultimo.valor).replaceAll("_"," ")
+        : "SIN VERIFICACION";
+      fila.appendChild(encabezado);
+
+      const fecha=document.createElement("div");
+      fecha.className="historico-fecha";
+      fecha.textContent=ultimo
+        ? formatoFechaHistorica(ultimo.fecha)+" | "+ultimo.origen
+        : "Sin registros historicos compatibles";
+      fila.appendChild(fecha);
+
+      cuadricula.appendChild(fila);
+      const historial=datos.eventos[clave]||[];
+      const barraFila=document.createElement("div");
+      barraFila.className="barra-fila";
+
+      const etiqueta=document.createElement("div");
+      etiqueta.className="barra-nombre";
+      etiqueta.textContent=nombre;
+
+      const barra=document.createElement("div");
+      barra.className="barra";
+
+      for(const evento of historial){
+        const segmento=document.createElement("div");
+        segmento.className=
+          "segmento "+clasificarHistorico(evento.valor);
+        segmento.title=
+          formatoFechaHistorica(evento.fecha)+" | "+
+          evento.valor+" | "+evento.origen;
+        barra.appendChild(segmento);
+      }
+
+      barraFila.append(etiqueta,barra);
+      barras.appendChild(barraFila);
+    }
+
+    for(const aviso of datos.advertencias||[]){
+      const p=document.createElement("p");
+      p.style.cssText="font-size:12px;opacity:.75";
+      p.textContent=aviso;
+      destino.appendChild(p);
+    }
+
+  }catch(error){
+    destino.textContent=
+      "No se pudieron consultar los historicos: "+error.message;
+  }
+}
+
+
+
+function clasificarIndicador(valor,fecha,vigenciaMinutos){
+  const v=String(valor||"").toUpperCase().trim();
+  const positivos=["ONLINE","OK","VIDEO_NORMAL"];
+  const negativos=["PANTALLA_NEGRA","SIN_VIDEO","FALLA_CONFIRMADA"];
+
+  if(!fecha)return "gris";
+
+  const instante=new Date(fecha);
+  const edad=Date.now()-instante.getTime();
+
+  if(!Number.isFinite(edad)||edad< -360000)return "gris";
+
+  if(positivos.includes(v))return "verde";
+  if(negativos.includes(v))return "rojo";
+
+  return "gris";
+}
+
+function dibujarPunto(valor,fecha,vigenciaMinutos){
+  const punto=document.createElement("span");
+  punto.className="indicador-punto "+clasificarIndicador(valor,fecha,vigenciaMinutos);
+  punto.title="Resultado: "+(valor||"SIN DATOS")+
+    " | Fecha: "+(fecha?formatoFechaHistorica(fecha):"Sin fecha");
+  return punto;
+}
+
+function actualizarIndicadoresCompactos(x){
+  for(const [id,valor] of [
+    ["indicadorDVR",x.dvr],
+    ["indicadorGPS",x.gps]
+  ]){
+    const destino=document.getElementById(id);
+    destino.replaceChildren();
+    const punto=dibujarPunto(valor,x.fecha,30);
+    const etiqueta=document.createElement("span");
+    etiqueta.textContent=String(valor||"SIN DATOS").replaceAll("_"," ");
+    destino.append(punto,etiqueta);
+  }
+
+  const destino=document.getElementById("indicadoresCamaras");
+  destino.replaceChildren();
+
+  for(let n=1;n<=4;n++){
+    const valor=(x.camaras||{})[String(n)]||"SIN DATOS";
+    const grupo=document.createElement("div");
+    grupo.className="indicador-camara";
+    const fecha=((x.fechas_camaras||{})[String(n)])||null;
+    const punto=dibujarPunto(valor,fecha,1440);
+    punto.title="Camara "+n+": "+valor+
+      " | Fecha: "+(fecha?formatoFechaHistorica(fecha):"Sin fecha");
+    const numero=document.createElement("span");
+    numero.textContent=String(n);
+    grupo.append(punto,numero);
+    destino.appendChild(grupo);
+  }
+}
+
+
+let mapaGPSV614=null;
+let marcadorGPSV614=null;
+let consultaGPSV614=0;
+
+async function cargarMapaGPSV614(interno){
+  const solicitud=++consultaGPSV614;
+  const estado=document.getElementById("estadoUbicacionGPS");
+  const contenedor=document.getElementById("mapaGPSFicha");
+  const enlace=document.getElementById("enlaceGPSFicha");
+
+  estado.textContent="Consultando última ubicación almacenada...";
+  contenedor.style.display="none";
+  enlace.style.display="none";
+
+  try{
+    const respuesta=await fetch(
+      "/api/ubicacion?interno="+encodeURIComponent(interno),
+      {cache:"no-store"}
+    );
+
+    if(!respuesta.ok)throw new Error("HTTP "+respuesta.status);
+
+    const dato=await respuesta.json();
+
+    if(solicitud!==consultaGPSV614)return;
+
+    const ficha=document.getElementById("ficha");
+    const titulo=document.getElementById("tituloFicha").textContent;
+
+    if(!ficha.classList.contains("abierta") ||
+       !titulo.startsWith("Interno "+interno+" "))return;
+
+    if(!dato.disponible){
+      estado.textContent="Ubicación GPS no disponible para este interno.";
+      return;
+    }
+
+    const lat=Number(dato.lat);
+    const lon=Number(dato.lon);
+
+    if(!Number.isFinite(lat)||!Number.isFinite(lon) ||
+       Math.abs(lat)>90||Math.abs(lon)>180){
+      estado.textContent="Las coordenadas almacenadas no son válidas.";
+      return;
+    }
+
+    const fecha=formatoFechaHistorica(dato.fecha);
+    const dias=Math.floor((dato.antiguedad_minutos||0)/1440);
+
+    estado.textContent="Última posición registrada: "+fecha;
+
+    enlace.href="https://www.openstreetmap.org/?mlat="+
+      encodeURIComponent(lat)+"&mlon="+encodeURIComponent(lon)+
+      "#map=16/"+lat+"/"+lon;
+
+    enlace.style.display="inline-block";
+
+    if(typeof L==="undefined"){
+      estado.textContent+=" | Mapa no disponible: no se cargó Leaflet.";
+      return;
+    }
+
+    contenedor.style.display="block";
+
+    if(!mapaGPSV614){
+      mapaGPSV614=L.map(contenedor,{
+        scrollWheelZoom:false
+      }).setView([lat,lon],16);
+
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        {
+          maxZoom:19,
+          attribution:"© OpenStreetMap contributors"
+        }
+      ).addTo(mapaGPSV614);
+
+      marcadorGPSV614=L.marker([lat,lon]).addTo(mapaGPSV614);
+    }else{
+      mapaGPSV614.setView([lat,lon],16);
+      marcadorGPSV614.setLatLng([lat,lon]);
+    }
+
+    marcadorGPSV614.bindPopup(
+      "Última ubicación registrada del interno "+interno
+    );
+
+    requestAnimationFrame(()=>{
+      if(solicitud===consultaGPSV614)
+        mapaGPSV614.invalidateSize();
+    });
+
+  }catch(error){
+    if(solicitud!==consultaGPSV614)return;
+    estado.textContent="No fue posible consultar la ubicación GPS.";
+  }
+}
+
+
+
+function configurarExpansionMapaV614(){
+  const mapa=document.getElementById("mapaGPSFicha");
+
+  if(mapa.dataset.expansionConfigurada==="1")return;
+  mapa.dataset.expansionConfigurada="1";
+
+  mapa.addEventListener("click",function(e){
+    // Evitar interferir con los controles propios de Leaflet.
+    if(e.target.closest(".leaflet-control"))return;
+
+    mapa.classList.toggle("ampliado");
+
+    if(mapaGPSV614){
+      setTimeout(()=>{
+        mapaGPSV614.invalidateSize();
+      },300);
+    }
+  });
+}
+
+function abrirFicha(x){
+ document.getElementById("tituloFicha").textContent=
+  "Interno "+x.interno+" · Línea "+x.linea;
+
+ document.getElementById("subtituloFicha").textContent=
+  "Última verificación: "+(x.fecha||"Sin diagnóstico");
+
+ const contenedor=document.getElementById("barrasFicha");
+ contenedor.replaceChildren();
+
+ const componentes=[
+  ["Online","DVR",x.dvr],
+  ["GPS","GPS",x.gps],
+  ...[1,2,3,4].map(n=>[
+   "Cámara "+n,"CAMARA "+n,x.camaras[String(n)]||"SIN DATOS"
+  ])
+ ];
+
+ for(const [nombre,tipo,actual] of componentes){
+  const fila=document.createElement("div");
+  fila.className="barra-fila";
+
+  const etiqueta=document.createElement("div");
+  etiqueta.className="barra-nombre";
+  etiqueta.textContent=nombre;
+
+  const barra=document.createElement("div");
+  barra.className="barra";
+
+  // Cada segmento representa una muestra realmente registrada.
+  const valores=(x.muestras||[]).map(m=>({
+    valor:m[tipo]||"NO_VERIFICABLE",
+    fecha:m.fecha
+  }));
+  for(const e of valores){
+   const segmento=document.createElement("div");
+   segmento.className="segmento "+claseEstado(e.valor);
+   segmento.title=e.fecha+" · "+e.valor;
+   barra.appendChild(segmento);
+  }
+
+  fila.append(etiqueta,barra);
+  contenedor.appendChild(fila);
+ }
+
+  const hdd=resultadosHDD[String(x.interno)]||{};
+  const estadoHDD=String(hdd.estado||"PENDIENTE").toUpperCase();
+  const nombresHDD={
+    LECTURA_OK:"LECTURA CONFIRMADA",
+    ERROR_DIAGNOSTICO:"NO VERIFICADO",
+    NO_VERIFICADO:"NO VERIFICADO",
+    SIN_DATOS:"SIN DATOS",
+    TIEMPO_AGOTADO:"NO VERIFICADO",
+    INTERRUMPIDO:"INTERRUMPIDO",
+    EN_PROCESO:"INTERRUMPIDO",
+    PENDIENTE:"PENDIENTE",
+    FALLA_HDD_CONFIRMADA:"FALLA HDD CONFIRMADA"
+  };
+  const textoHDD=nombresHDD[estadoHDD]||"ESTADO DESCONOCIDO";
+  const fechaHDD=hdd.fecha
+    ? new Date(hdd.fecha).toLocaleString("es-AR")
+    : "Sin fecha";
+  const codigoHDD=hdd.codigo_salida==null
+    ? "Sin codigo" : String(hdd.codigo_salida);
+  const detalleHDD=hdd.detalle
+    ? " | Detalle: "+hdd.detalle : "";
+
+  document.getElementById("detalleFicha").textContent=
+   ""+
+   " | HDD: "+textoHDD+
+   " | Fecha HDD: "+fechaHDD+
+   " | Codigo: "+codigoHDD+
+   detalleHDD+
+   "";
+
+  actualizarIndicadoresCompactos(x);
+  configurarExpansionMapaV614();
+  document.getElementById("mapaGPSFicha").classList.remove("ampliado");
+  cargarMapaGPSV614(String(x.interno));
+  document.getElementById("historialFichaDesplegable").open=true;
+ document.getElementById("ficha").classList.add("abierta");
+  cargarFichaHistorica(String(x.interno));
+}
+
+document.getElementById("cerrarFicha").addEventListener("click",()=>{
+ document.getElementById("ficha").classList.remove("abierta");
+});
+document.getElementById("ficha").addEventListener("click",e=>{
+ if(e.target.id==="ficha")
+  e.currentTarget.classList.remove("abierta");
+});
+
+function estado(texto){
+ const s=document.createElement("span");
+ s.className="estado ";
+ s.textContent=texto;
+ if(["ONLINE","OK","VIDEO_NORMAL"].includes(texto))s.className+="bien";
+ else if(["PANTALLA_NEGRA","SIN_VIDEO","LOGIN_O_SESION_FALLIDA"].includes(texto))s.className+="mal";
+ else if(["ANTIGUO","DESACTUALIZADO"].includes(texto))s.className+="aviso";
+ else s.className+="neutro";
+ return s;
+}
+
+function celda(tr,valor,etiqueta=false){
+ const td=document.createElement("td");
+ if(etiqueta)td.appendChild(estado(valor));
+ else td.textContent=valor;
+ tr.appendChild(td);
+}
+
+
+
+let alertaActivaV614 = "";
+let tipoAlertaV614 = "falla";
+
+function estadoHDDAlertaV614(x) {
+    const registro = resultadosHDD[String(x.interno)];
+    return String(
+        registro ? registro.estado : (x.hdd || "PENDIENTE")
+    ).toUpperCase();
+}
+
+function coincideAlertaV614(x, categoria, tipo="falla") {
+    if (!categoria) return true;
+
+    const dvr = String(x.dvr || "SIN DATOS").toUpperCase();
+    const gps = String(x.gps || "SIN DATOS").toUpperCase();
+    const camaras = Object.values(x.camaras || {})
+        .map(v => String(v || "").toUpperCase());
+    const hdd = estadoHDDAlertaV614(x);
+
+    if (categoria === "dvr") {
+        if (tipo === "sinverificar")
+            return ["SIN DATOS","PENDIENTE","NO_VERIFICADO",""].includes(dvr);
+        return ["OFFLINE","DESCONECTADO","SIN_CONEXION",
+                "LOGIN_O_SESION_FALLIDA"].includes(dvr);
+    }
+
+    if (categoria === "gps") {
+        if (tipo === "sinverificar")
+            return ["SIN DATOS","PENDIENTE","NO_VERIFICADO",""].includes(gps);
+        return ["SIN_GPS","GPS_FALLA","SIN_SENAL","ERROR_GPS"].includes(gps);
+    }
+
+    if (categoria === "camaras") {
+        if (tipo === "sinverificar")
+            return camaras.length === 0 ||
+                camaras.some(v =>
+                    ["SIN DATOS","PENDIENTE","NO_VERIFICADO",""].includes(v)
+                );
+        return camaras.some(v =>
+            ["PANTALLA_NEGRA","SIN_VIDEO","VIDEO_PERDIDO"].includes(v)
+        );
+    }
+
+    if (categoria === "hdd") {
+        if (tipo === "sinverificar")
+            return ["ERROR_DIAGNOSTICO","NO_VERIFICADO",
+                    "SIN_DATOS","TIEMPO_AGOTADO",
+                    "PENDIENTE","INTERRUMPIDO",
+                    "EN_PROCESO"].includes(hdd);
+        return hdd === "FALLA_HDD_CONFIRMADA";
+    }
+
+    return true;
+}
+
+function actualizarCentroAlertasV614(filasLinea) {
+    const categorias = [
+        ["dvr","alertaDVRV614","alertaDVRSinV614"],
+        ["gps","alertaGPSV614","alertaGPSSinV614"],
+        ["camaras","alertaCamarasV614","alertaCamarasSinV614"],
+        ["hdd","alertaHDDV614","alertaHDDSinV614"]
+    ];
+
+    for (const [categoria,idFalla,idSin] of categorias) {
+        document.getElementById(idFalla).textContent =
+            filasLinea.filter(x =>
+                coincideAlertaV614(x,categoria,"falla")
+            ).length;
+
+        document.getElementById(idSin).textContent =
+            filasLinea.filter(x =>
+                coincideAlertaV614(x,categoria,"sinverificar")
+            ).length;
+    }
+
+    const linea = document.getElementById("linea").value;
+    document.getElementById("alcanceAlertasV614").textContent =
+        linea ? (linea === "VARELA" ? "Varela" : "Línea " + linea)
+              : "Toda la flota";
+
+    document.querySelectorAll("#alertasGridV614 button")
+        .forEach(b => b.classList.toggle(
+            "activo",
+            b.dataset.alerta === alertaActivaV614 &&
+            b.dataset.tipo === tipoAlertaV614
+        ));
+}
+
+document.querySelectorAll("#alertasGridV614 button")
+    .forEach(b => b.addEventListener("click", () => {
+        const misma =
+            alertaActivaV614 === b.dataset.alerta &&
+            tipoAlertaV614 === b.dataset.tipo;
+
+        alertaActivaV614 = misma ? "" : b.dataset.alerta;
+        tipoAlertaV614 = b.dataset.tipo;
+        mostrar();
+    }));
+
+document.getElementById("limpiarAlertaV614")
+    .addEventListener("click", () => {
+        alertaActivaV614 = "";
+        mostrar();
+    });
+
+function mostrar(){
+ actualizarBotones();
+ const busqueda=document.getElementById("buscar").value.trim();
+ const linea=document.getElementById("linea").value;
+ const tbody=document.getElementById("filas");
+ tbody.replaceChildren();
+
+ const filtrados=datos.filter(x=>
+  x.interno.includes(busqueda)&&(
+    !linea ||
+    (linea==="VARELA"
+      ? (/^5/.test(String(x.linea)) && String(x.linea)!=="514")
+      : String(x.linea)===linea)
+   )
+ );
+
+  actualizarCentroAlertasV614(filtrados);
+
+  const filtradosAlertas = filtrados.filter(
+      x => coincideAlertaV614(x,alertaActivaV614,tipoAlertaV614)
+  );
+
+  for(const x of filtradosAlertas){
+  const tr=document.createElement("tr");
+  tr.style.cursor="pointer";
+  tr.addEventListener("click",()=>abrirFicha(x));
+  celda(tr,x.interno);
+  celda(tr,x.dvr,true);
+  celda(tr,x.gps,true);
+
+  const cams=Object.values(x.camaras);
+  const normales=cams.filter(v=>v==="VIDEO_NORMAL").length;
+  celda(tr,cams.length?`${normales}/${cams.length} normales`:"SIN DATOS");
+
+  celda(tr,x.hdd,true);
+  celda(tr,x.fecha?new Date(x.fecha).toLocaleString("es-AR"):"—");
+  celda(tr,x.vigencia,true);
+  tbody.appendChild(tr);
+ }
+ document.getElementById("mensaje").textContent=
+  `${filtradosAlertas.length} colectivos visibles`;
+}
+
+async function cargar(){
+ const mensaje=document.getElementById("mensaje");
+ mensaje.textContent="Cargando datos...";
+ try{
+  const r=await fetch("/api/flota",{cache:"no-store"});
+  if(!r.ok)throw Error("HTTP "+r.status);
+  datos=await r.json();
+
+  document.getElementById("total").textContent=datos.length;
+  const n=datos.filter(x=>x.fecha).length;
+  document.getElementById("diagnosticados").textContent=n;
+  document.getElementById("sinDatos").textContent=datos.length-n;
+
+  const selector=document.getElementById("linea");
+  const anterior=selector.value;
+  selector.replaceChildren(new Option("Todas",""));
+   selector.add(new Option("Varela","VARELA"));
+  [...new Set(datos.map(x=>x.linea))].sort((a,b)=>Number(a)-Number(b))
+   .forEach(l=>selector.add(new Option(l,l)));
+  selector.value=anterior;
+   if(!window.lineaInicializada){
+    const disponibles=[...selector.options].map(o=>o.value);
+    selector.value=disponibles.includes("271")
+      ? "271"
+      : (disponibles.find(v=>v && v!=="VARELA")||"");
+    window.lineaInicializada=true;
+   }
+  mostrar();
+ }catch(e){
+  mensaje.textContent="Error al cargar datos: "+e.message;
+ }
+}
+
+
+function actualizarBotones(){
+ const linea=document.getElementById("linea").value;
+ document.querySelectorAll(".boton-linea").forEach(b=>{
+  b.classList.toggle("activo",b.dataset.linea===linea);
+ });
+}
+
+document.querySelectorAll(".boton-linea").forEach(b=>{
+ b.addEventListener("click",()=>{
+  document.getElementById("linea").value=b.dataset.linea;
+  mostrar();
+ });
+});
+
+document.getElementById("buscar").addEventListener("input",mostrar);
+document.getElementById("linea").addEventListener("change",mostrar);
+document.getElementById("actualizar").addEventListener("click",cargar);
+cargar();
+setInterval(() => { cargar(); }, 15000);
+</script>
+<script>
+async function actualizarEstadoInternet() {
+    const aviso = document.getElementById("aviso-internet");
+    const indicador = document.getElementById("estado-internet-pequeno");
+
+    try {
+        const respuesta = await fetch("/api/internet", {
+            cache: "no-store"
+        });
+
+        if (!respuesta.ok) {
+            throw new Error("HTTP " + respuesta.status);
+        }
+
+        const datos = await respuesta.json();
+
+        if (datos.estado === "SIN_INTERNET") {
+            aviso.style.display = "block";
+            indicador.textContent = "Internet: SIN CONEXIÓN";
+            indicador.style.color = "#a61c1c";
+        } else if (datos.estado === "CONECTADO") {
+            aviso.style.display = "none";
+            indicador.textContent = "Internet: conectado";
+            indicador.style.color = "#327a42";
+        } else {
+            aviso.style.display = "none";
+            indicador.textContent = "Internet: verificando...";
+            indicador.style.color = "#666";
+        }
+
+        if (datos.ultima_comprobacion) {
+            const fecha = new Date(datos.ultima_comprobacion);
+            indicador.textContent +=
+                " | Última comprobación: " +
+                fecha.toLocaleTimeString("es-AR");
+        }
+
+        if (datos.simulacion) {
+            indicador.textContent += " | MODO SIMULACIÓN";
+        }
+
+    } catch (error) {
+        aviso.style.display = "none";
+        indicador.textContent =
+            "No se puede consultar el estado de Internet del servidor";
+        indicador.style.color = "#a61c1c";
+    }
+}
+
+actualizarEstadoInternet();
+setInterval(actualizarEstadoInternet, 5000);
+</script>
+<script>
+(function () {
+    const boton = document.getElementById("boton-historial");
+    const panel = document.getElementById("contenido-historial");
+    const lista = document.getElementById("lista-historial");
+    const filtros = document.getElementById("filtros-historial");
+
+    const botonDetalles = document.getElementById("ver-detalles-cortes");
+    const seccionDetalles = document.getElementById("seccion-detalles-cortes");
+
+    let eventos = [];
+    let filtroActual = "todos";
+
+    function formatearFecha(valor, esUTC) {
+        if (!valor) return "Fecha no disponible";
+        const fecha = new Date(valor);
+        if (isNaN(fecha.getTime())) return valor;
+        return fecha.toLocaleString("es-AR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+        });
+    }
+
+    function duracion(segundos) {
+        if (segundos === null || segundos === undefined) return "";
+        const s = Math.max(0, Number(segundos));
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const r = Math.floor(s % 60);
+        return [h ? h + " h" : "", m ? m + " min" : "",
+                r ? r + " s" : ""].filter(Boolean).join(" ") || "0 s";
+    }
+
+    function agregarTexto(elemento, etiqueta, valor) {
+        const nodo = document.createElement(etiqueta);
+        nodo.textContent = valor;
+        elemento.appendChild(nodo);
+    }
+
+
+
+    function dibujarGraficoClaro(dias) {
+        const grafico = document.getElementById("grafico-cortes");
+        grafico.replaceChildren();
+
+        const activos = dias.filter(d => d.internet > 0 || d.servidor > 0);
+
+        if (activos.length === 0) {
+            const mensaje = document.createElement("div");
+            mensaje.className = "grafico-sin-incidentes";
+            mensaje.textContent = "Sin interrupciones registradas en los ultimos 30 dias";
+            grafico.appendChild(mensaje);
+            return;
+        }
+
+        const maximo = Math.max(
+            1,
+            ...activos.map(d => Math.max(d.internet, d.servidor))
+        );
+
+        activos.forEach(d => {
+            const grupo = document.createElement("div");
+            grupo.className = "grupo-dia-claro";
+
+            const barras = document.createElement("div");
+            barras.className = "barras-dia-claro";
+
+            const crearBarra = (cantidad, clase, descripcion) => {
+                const contenedor = document.createElement("div");
+                contenedor.className = "contenedor-barra-clara";
+
+                if (cantidad > 0) {
+                    const numero = document.createElement("span");
+                    numero.className = "numero-barra-clara";
+                    numero.textContent = String(cantidad);
+
+                    const barra = document.createElement("div");
+                    barra.className = "barra-clara " + clase;
+                    barra.style.height = Math.max(
+                        12,
+                        cantidad / maximo * 100
+                    ) + "%";
+
+                    contenedor.appendChild(numero);
+                    contenedor.appendChild(barra);
+                }
+
+                contenedor.title =
+                    descripcion + ": " + cantidad +
+                    " | " + d.fecha.toLocaleDateString("es-AR");
+
+                return contenedor;
+            };
+
+            barras.appendChild(
+                crearBarra(d.internet, "barra-internet", "Internet")
+            );
+
+            barras.appendChild(
+                crearBarra(d.servidor, "barra-servidor", "Servidor")
+            );
+
+            const fecha = document.createElement("span");
+            fecha.className = "fecha-dia-claro";
+            fecha.textContent = d.fecha.toLocaleDateString("es-AR", {
+                day: "numeric",
+                month: "short"
+            });
+
+            grupo.appendChild(barras);
+            grupo.appendChild(fecha);
+            grafico.appendChild(grupo);
+        });
+    }
+
+    function actualizarGraficoCortes() {
+        const ahora = new Date();
+        const inicio = new Date(
+            ahora.getFullYear(),
+            ahora.getMonth(),
+            ahora.getDate() - 29
+        );
+
+        const recientes = eventos.filter(e =>
+            Number.isFinite(e.orden) &&
+            e.orden >= inicio.getTime() &&
+            e.orden <= ahora.getTime()
+        );
+
+        const contar = (categoria, titulo) =>
+            recientes.filter(e =>
+                e.categoria === categoria &&
+                e.titulo === titulo
+            ).length;
+
+        document.getElementById("total-cortes-internet").textContent =
+            contar("internet", "Corte de Internet");
+
+        document.getElementById("total-cortes-inesperados").textContent =
+            contar("servidor", "Interrupcion inesperada");
+
+        document.getElementById("total-apagados-normales").textContent =
+            contar("servidor", "Apagado solicitado");
+
+        const dias = [];
+
+        for (let i = 29; i >= 0; i--) {
+            const dia = new Date(
+                ahora.getFullYear(),
+                ahora.getMonth(),
+                ahora.getDate() - i
+            );
+
+            const siguiente = new Date(
+                dia.getFullYear(),
+                dia.getMonth(),
+                dia.getDate() + 1
+            );
+
+            const delDia = recientes.filter(e =>
+                e.orden >= dia.getTime() &&
+                e.orden < siguiente.getTime()
+            );
+
+            dias.push({
+                fecha: dia,
+                internet: delDia.filter(e =>
+                    e.categoria === "internet" &&
+                    e.titulo === "Corte de Internet"
+                ).length,
+                servidor: delDia.filter(e =>
+                    e.categoria === "servidor" &&
+                    e.titulo === "Interrupcion inesperada"
+                ).length
+            });
+        }
+
+        dibujarGraficoClaro(dias);
+    }
+
+    botonDetalles.addEventListener("click", () => {
+        const mostrar = seccionDetalles.hidden;
+
+        seccionDetalles.hidden = !mostrar;
+        botonDetalles.setAttribute(
+            "aria-expanded",
+            String(mostrar)
+        );
+
+        botonDetalles.textContent = mostrar
+            ? "Ocultar detalles"
+            : "Ver detalles de los cortes";
+    });
+
+    function renderizar() {
+        lista.replaceChildren();
+
+        const visibles = eventos.filter(e =>
+            filtroActual === "todos" || e.categoria === filtroActual
+        ).slice(0, 60);
+
+        if (!visibles.length) {
+            agregarTexto(lista, "p", "No hay eventos registrados para este filtro.");
+            return;
+        }
+
+        visibles.forEach(e => {
+            const item = document.createElement("div");
+            item.className = "evento-historial";
+
+            agregarTexto(item, "strong", e.titulo);
+            agregarTexto(item, "small", e.fechaVisible);
+
+            if (e.detalle) agregarTexto(item, "small", e.detalle);
+
+            if (e.duracion_segundos !== null &&
+                e.duracion_segundos !== undefined) {
+                const prefijo = e.categoria === "internet"
+                    ? "Duracion del corte: "
+                    : "Intervalo hasta el siguiente inicio: ";
+                agregarTexto(item, "small",
+                    prefijo + duracion(e.duracion_segundos));
+            }
+
+            lista.appendChild(item);
+        });
+    }
+
+    async function cargarHistorial() {
+        try {
+            const respuesta = await fetch("/api/historial", {
+                cache: "no-store"
+            });
+            if (!respuesta.ok) throw new Error("HTTP " + respuesta.status);
+
+            const datos = await respuesta.json();
+            const internet = Array.isArray(datos.internet) ? datos.internet : [];
+            const servidor = Array.isArray(datos.servidor) ? datos.servidor : [];
+
+            const combinados = [];
+
+            internet.forEach(e => {
+                const fecha = e.fecha || "";
+                combinados.push({
+                    categoria: "internet",
+                    titulo: e.evento === "CORTE"
+                        ? "Corte de Internet"
+                        : "Recuperacion de Internet",
+                    fecha,
+                    fechaVisible: formatearFecha(fecha, true),
+                    detalle: e.evento === "CORTE"
+                        ? "Conexion externa interrumpida"
+                        : "Conexion externa restablecida",
+                    duracion_segundos: e.detalle?.duracion_segundos ?? null
+                });
+            });
+
+            servidor.forEach(e => {
+                const fecha = e.fecha || "";
+                combinados.push({
+                    categoria: "servidor",
+                    titulo: e.titulo || e.tipo || "Evento de Windows",
+                    fecha,
+                    fechaVisible: formatearFecha(fecha, false),
+                    detalle: e.detalle || "",
+                    duracion_segundos: e.duracion_segundos ?? null
+                });
+            });
+
+            // Windows devuelve fechas locales sin zona horaria.
+            // Internet utiliza fechas UTC; ordenar por instante real.
+            combinados.forEach(e => {
+                const valor = e.fecha;
+                e.orden = new Date(valor).getTime() || 0;
+            });
+
+            eventos = combinados.sort((a, b) => b.orden - a.orden);
+            actualizarGraficoCortes();
+            renderizar();
+        } catch (error) {
+            lista.replaceChildren();
+            agregarTexto(lista, "p", "No se pudo cargar el historial.");
+        }
+    }
+
+    boton.addEventListener("click", () => {
+        const abierto = panel.classList.toggle("abierto");
+        boton.setAttribute("aria-expanded", String(abierto));
+        if (abierto) cargarHistorial();
+    });
+
+    filtros.addEventListener("click", e => {
+        const seleccionado = e.target.closest("button[data-filtro]");
+        if (!seleccionado) return;
+
+        filtroActual = seleccionado.dataset.filtro;
+
+        filtros.querySelectorAll("button").forEach(b => {
+            b.classList.toggle("activo", b === seleccionado);
+        });
+
+        renderizar();
+    });
+
+    setInterval(() => {
+        if (panel.classList.contains("abierto")) cargarHistorial();
+    }, 30000);
+})();
+</script>
+
+<script>
+(function () {
+    const ESTADOS = {
+        LECTURA_OK: ["LECTURA OK", "hdd-ok"],
+        NO_VERIFICADO: ["SIN DATOS", "hdd-sin-datos"],
+        SIN_DATOS: ["SIN DATOS", "hdd-sin-datos"],
+        TIEMPO_AGOTADO: ["NO VERIFICADO", "hdd-error"],
+        ERROR_DIAGNOSTICO: ["NO VERIFICADO", "hdd-error"],
+        FALLA_HDD_CONFIRMADA: ["NO FUNCIONA", "hdd-falla"],
+        EN_PROCESO: ["INTERRUMPIDO", "hdd-pendiente"],
+        INTERRUMPIDO: ["INTERRUMPIDO", "hdd-pendiente"],
+        PENDIENTE: ["PENDIENTE", "hdd-pendiente"]
+    };
+
+    function escapar(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            "&":"&amp;", "<":"&lt;", ">":"&gt;",
+            '"':"&quot;", "'":"&#39;"
+        })[c]);
+    }
+
+    function buscarTabla() {
+        const tablas = [...document.querySelectorAll("table")];
+        for (const tabla of tablas) {
+            const encabezados = [...tabla.querySelectorAll("thead th")];
+            const indice = encabezados.findIndex(
+                th => th.textContent.trim().toUpperCase() === "HDD"
+            );
+            if (indice >= 0) return {tabla, indice};
+        }
+        return null;
+    }
+
+    async function actualizarHDD() {
+        const encontrado = buscarTabla();
+        if (!encontrado) return;
+
+        let datos;
+        try {
+            const respuesta = await fetch("/api/hdd", {cache:"no-store"});
+            if (!respuesta.ok) return;
+            datos = await respuesta.json();
+            resultadosHDD = datos;
+            if (typeof actualizarCentroAlertasV614 === "function" &&
+                typeof datos !== "undefined" && Array.isArray(datos)) {
+                const lineaActual = document.getElementById("linea").value;
+                const busquedaActual = document.getElementById("buscar").value.trim();
+                const filasActuales = datos.filter(x =>
+                    String(x.interno).includes(busquedaActual) &&
+                    (!lineaActual ||
+                     (lineaActual === "VARELA"
+                       ? (/^5/.test(String(x.linea)) && String(x.linea) !== "514")
+                       : String(x.linea) === lineaActual))
+                );
+                actualizarCentroAlertasV614(filasActuales);
+            }
+        } catch (_) {
+            return;
+        }
+
+        const {tabla, indice} = encontrado;
+        const encabezados = [...tabla.querySelectorAll("thead th")];
+        const indiceInterno = encabezados.findIndex(
+            th => th.textContent.trim().toUpperCase().includes("INTERNO")
+        );
+
+        if (indiceInterno < 0) return;
+
+        for (const fila of tabla.querySelectorAll("tbody tr")) {
+            const celdas = fila.querySelectorAll("td");
+            if (celdas.length <= Math.max(indice, indiceInterno)) continue;
+
+            const interno = celdas[indiceInterno].textContent.trim();
+            const registro = datos[interno] || {};
+            const estado = String(registro.estado || "PENDIENTE").toUpperCase();
+            const [texto, clase] = ESTADOS[estado] || ["ERROR", "hdd-error"];
+
+            let fechaHTML = "";
+            if (registro.fecha) {
+                const fecha = new Date(registro.fecha);
+                if (!Number.isNaN(fecha.getTime()) &&
+                    Date.now() - fecha.getTime() > 12 * 3600000) {
+                    fechaHTML = '<span class="hdd-fecha">' +
+                        escapar(fecha.toLocaleString("es-AR")) + '</span>';
+                }
+            }
+
+            celdas[indice].innerHTML =
+                '<span class="hdd-etiqueta ' + clase + '">' +
+                escapar(texto) + '</span>' + fechaHTML;
+        }
+    }
+
+    setInterval(actualizarHDD, 3000);
+    window.addEventListener("load", actualizarHDD);
+})();
+</script>
+<script>
+(function () {
+    async function actualizarUltimoInterno() {
+        try {
+            const respuesta = await fetch('/api/progreso_barrido', {cache:'no-store'});
+            if (!respuesta.ok) throw new Error('HTTP ' + respuesta.status);
+            const datos = await respuesta.json();
+            const elemento = document.getElementById('numero-ultimo-interno');
+            if (elemento) {
+                elemento.textContent = datos.ultimo_interno_revisado || '—';
+            }
+        } catch (error) {
+            console.warn('No se pudo actualizar el ultimo interno:', error);
+        }
+    }
+    actualizarUltimoInterno();
+    setInterval(actualizarUltimoInterno, 5000);
+})();
+</script>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import {getDatabase,ref,onValue} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-const firebaseConfig={apiKey:"AIzaSyAtw7ozZpqcxUMKZ82gTFTD4lBGheOmiH4",authDomain:"monitor-flota-carlan.firebaseapp.com",databaseURL:"https://monitor-flota-carlan-default-rtdb.firebaseio.com",projectId:"monitor-flota-carlan",storageBucket:"monitor-flota-carlan.firebasestorage.app",messagingSenderId:"1026239718729",appId:"1:1026239718729:web:8cdbe2f7f6c8119b19a698"};
-const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
-let cancelar=null,internos=[];
-const texto=v=>v===null||v===undefined||v===""?"—":String(v);
-function chip(valor,tipo){const el=document.createElement("span");el.className="chip "+tipo;el.textContent=valor;return el}
-function estado(valor,clase){return chip(texto(valor),clase)}
-function pintarFilas(){
- const q=$("buscar").value.trim().toLowerCase(),c=$("filtroConexion").value,g=$("filtroGps").value,h=$("filtroHdd").value;
- const vistos=internos.filter(x=>(!q||String(x.interno).toLowerCase().includes(q))&&(!c||x.conectividad===c)&&(!g||x.gps===g)&&(!h||x.hdd===h));
- $("cantidadFiltrada").textContent=internos.length?vistos.length+" de "+internos.length+" internos":"";
- const body=$("filas");body.replaceChildren();
- if(!vistos.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="empty";td.textContent=internos.length?"No hay internos que coincidan con los filtros.":"Todavía no se publicaron registros individuales.";tr.append(td);body.append(tr);return}
- for(const x of vistos){const tr=document.createElement("tr"),add=(v,node)=>{const td=document.createElement("td");if(node)td.append(node);else td.textContent=texto(v);tr.append(td)};
- add(x.interno);add(null,estado(x.conectividad,x.conectividad==="ONLINE"?"ok":"neutral"));
- add(null,estado(x.gps,x.gps==="GPS_OK"?"ok":"neutral"));
- add(null,estado(x.hdd,x.hdd==="LECTURA_OK"?"ok":x.hdd==="ERROR_DIAGNOSTICO"?"warn":"neutral"));
- add(x.fecha_consulta||x.actualizado);body.append(tr)}
-}
-for(const id of ["buscar","filtroConexion","filtroGps","filtroHdd"])$(id).addEventListener("input",pintarFilas);
-function pintar(d){
- $("ultimo").textContent=texto(d?.ultimo_interno_revisado);
- $("completados").textContent=d?.completados!=null&&d?.total!=null?d.completados+" / "+d.total:"—";
- $("barrido").textContent=texto(d?.estado);
- $("actualizacion").textContent=d?.actualizado?"Última actualización del servidor: "+d.actualizado:"Esperando datos del servidor...";
- const raw=d?.internos;
- internos=Array.isArray(raw)?raw.filter(x=>x&&typeof x==="object"):raw&&typeof raw==="object"?Object.entries(raw).filter(([,v])=>v&&typeof v==="object").map(([k,v])=>({...v,interno:v.interno??k})):[];
- internos.sort((a,b)=>String(a.interno).localeCompare(String(b.interno),"es",{numeric:true}));
- $("conDetalle").textContent=raw==null?"—":internos.length;
- const contar=(campo,valor)=>internos.filter(x=>x[campo]===valor).length;
- const stats=d?.estadisticas||{};
- for(const [id,key,field,val] of [["online","online","conectividad","ONLINE"],["sinConexion","no_verificado","conectividad","NO_VERIFICADO"],["gpsOk","gps_ok","gps","GPS_OK"],["hddOk","hdd_lectura_ok","hdd","LECTURA_OK"]]){
-  $(id).textContent=raw!=null?contar(field,val):stats[key]??"—";
- }
- pintarFilas();
-}
-$("formulario").addEventListener("submit",async e=>{e.preventDefault();$("estado").textContent="Ingresando...";$("entrar").disabled=true;try{await signInWithEmailAndPassword(auth,$("correo").value.trim(),$("clave").value);$("clave").value="";$("estado").textContent=""}catch{$("estado").textContent="No se pudo iniciar sesión. Revisá el correo y la contraseña."}finally{$("entrar").disabled=false}});
-$("salir").addEventListener("click",()=>signOut(auth));
+const app=initializeApp({"apiKey":"AIzaSyAtw7ozZpqcxUMKZ82gTFTD4lBGheOmiH4","authDomain":"monitor-flota-carlan.firebaseapp.com","databaseURL":"https://monitor-flota-carlan-default-rtdb.firebaseio.com","projectId":"monitor-flota-carlan","storageBucket":"monitor-flota-carlan.firebasestorage.app","messagingSenderId":"1026239718729","appId":"1:1026239718729:web:8cdbe2f7f6c8119b19a698"}),auth=getAuth(app),db=getDatabase(app);
+let stop=null;
+const el=id=>document.getElementById(id);
+el("carlan-form").addEventListener("submit",async e=>{e.preventDefault();el("carlan-error").textContent="Ingresando...";try{await signInWithEmailAndPassword(auth,el("carlan-email").value.trim(),el("carlan-password").value);el("carlan-password").value=""}catch{el("carlan-error").textContent="No se pudo ingresar. Verificá las credenciales."}});
 onAuthStateChanged(auth,user=>{
- if(cancelar){cancelar();cancelar=null}
- $("acceso").classList.toggle("oculto",!!user);$("monitor").classList.toggle("oculto",!user);$("salir").classList.toggle("oculto",!user);
- if(!user){internos=[];pintar(null);return}
- $("conexion").textContent="Conectando...";
- cancelar=onValue(ref(db,"monitor"),snapshot=>{pintar(snapshot.val());$("conexion").textContent="Conectado";$("conexion").className="chip ok"},error=>{$("actualizacion").textContent="No se pudo leer el monitor: "+error.code;$("conexion").textContent="Sin acceso a datos";$("conexion").className="chip warn"});
+ if(stop){stop();stop=null}
+ if(!user){document.body.classList.remove("carlan-autorizado");window.__carlanClear();el("carlan-error").textContent="Ingresá para ver el monitor.";return}
+ document.body.classList.add("carlan-autorizado");
+ stop=onValue(ref(db,"monitor"),s=>{
+  const d=s.val()||{};window.__carlanSetData(d);
+  const nota=el("carlan-nota");if(nota)nota.style.display=(d.flota||d.colectivos)?"none":"block";
+  const n=el("numero-ultimo-interno");if(n)n.textContent=d.ultimo_interno_revisado||"—";
+  if(d.flota||d.colectivos){if(typeof window.cargar==="function")window.cargar()}
+ },err=>{el("carlan-error").textContent="Error de lectura: "+err.code;document.body.classList.remove("carlan-autorizado")});
 });
+const b=document.createElement("button");b.id="carlan-salir";b.textContent="Cerrar sesión";b.addEventListener("click",()=>signOut(auth));document.body.append(b);
 </script>
-</body></html>
+</body>
+</html>
