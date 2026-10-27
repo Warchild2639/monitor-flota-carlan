@@ -1051,7 +1051,7 @@ main > .barra-empresas .boton-linea {
 let datos=[];
 let resultadosHDD={};
 function claseEstado(valor){
- if(["ONLINE","OK","VIDEO_NORMAL"].includes(valor))return "bien";
+ if(["ONLINE","OK","GPS_OK","VIDEO_NORMAL"].includes(valor))return "bien";
  if(["LOGIN_O_SESION_FALLIDA","PANTALLA_NEGRA"].includes(valor))return "mal";
  if(valor==="SIN_VIDEO")return "aviso";
  return "neutro";
@@ -1067,7 +1067,7 @@ function formatoFechaHistorica(valor){
 
 function clasificarHistorico(valor){
   const v=String(valor||"").toUpperCase();
-  if(["ONLINE","OK","VIDEO_NORMAL"].includes(v))return "bien";
+  if(["ONLINE","OK","GPS_OK","VIDEO_NORMAL"].includes(v))return "bien";
   if(["PANTALLA_NEGRA","SIN_VIDEO"].includes(v))return "aviso";
   return "neutro";
 }
@@ -1200,7 +1200,7 @@ async function cargarFichaHistorica(interno){
 
 function clasificarIndicador(valor,fecha,vigenciaMinutos){
   const v=String(valor||"").toUpperCase().trim();
-  const positivos=["ONLINE","OK","VIDEO_NORMAL"];
+  const positivos=["ONLINE","OK","GPS_OK","VIDEO_NORMAL"];
   const negativos=["PANTALLA_NEGRA","SIN_VIDEO","FALLA_CONFIRMADA"];
 
   if(!fecha)return "gris";
@@ -1233,7 +1233,7 @@ function actualizarIndicadoresCompactos(x){
     destino.replaceChildren();
     const punto=dibujarPunto(valor,x.fecha,30);
     const etiqueta=document.createElement("span");
-    etiqueta.textContent=String(valor||"SIN DATOS").replaceAll("_"," ");
+    etiqueta.textContent=String(etiquetaEstado(valor)||"SIN DATOS").replaceAll("_"," ");
     destino.append(punto,etiqueta);
   }
 
@@ -1468,11 +1468,13 @@ document.getElementById("ficha").addEventListener("click",e=>{
   e.currentTarget.classList.remove("abierta");
 });
 
+function etiquetaEstado(texto){return String(texto||"").toUpperCase()==="GPS_OK"?"OK":texto;}
+
 function estado(texto){
  const s=document.createElement("span");
  s.className="estado ";
- s.textContent=texto;
- if(["ONLINE","OK","VIDEO_NORMAL"].includes(texto))s.className+="bien";
+ s.textContent=etiquetaEstado(texto);
+ if(["ONLINE","OK","GPS_OK","VIDEO_NORMAL"].includes(texto))s.className+="bien";
  else if(["PANTALLA_NEGRA","SIN_VIDEO","LOGIN_O_SESION_FALLIDA"].includes(texto))s.className+="mal";
  else if(["ANTIGUO","DESACTUALIZADO"].includes(texto))s.className+="aviso";
  else s.className+="neutro";
