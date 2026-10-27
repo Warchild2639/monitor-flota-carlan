@@ -4,71 +4,106 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Monitor de Flota Carlan</title>
 <style>
-:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color-scheme:dark;background:#0b1220;color:#eef4ff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#152238;padding:20px max(20px,calc((100vw - 980px)/2));border-bottom:1px solid #34455d}
-h1{margin:0;font-size:1.5rem}main{max-width:980px;margin:40px auto;padding:0 20px}.panel{background:#17243a;border:1px solid #34455d;border-radius:14px;padding:24px;max-width:440px}
-label{display:block;margin:16px 0 5px}input{width:100%;padding:12px;background:#0c1729;border:1px solid #54647b;border-radius:8px;color:white;font-size:1rem}
-button{background:#2e78e6;border:0;color:white;padding:12px 18px;border-radius:8px;cursor:pointer;margin-top:20px;font-weight:650}
-button:disabled{opacity:.6}#salir{background:#34455d;margin:0}#estado{margin-top:16px;white-space:pre-wrap}.muted{color:#a9b9cf}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.resumen{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
-.dato{background:#17243a;border:1px solid #34455d;border-radius:10px;padding:18px;min-width:160px}
-.dato strong{display:block;font-size:1.6rem;margin-top:6px}.oculto{display:none}
+:root{font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif;color-scheme:dark;background:#0b1220;color:#edf3fc}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#132139;border-bottom:1px solid #30435f;padding:16px max(18px,calc((100vw - 1180px)/2))}
+h1{font-size:1.4rem;margin:0}h2{font-size:1.1rem;margin:0 0 12px}h3{font-size:1rem;margin:0 0 14px}
+main{max-width:1220px;margin:28px auto;padding:0 18px 40px}.top,.between{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.muted{color:#a9b9cf}.small{font-size:.85rem}.oculto{display:none!important}
+.panel,.dato{background:#17263e;border:1px solid #334761;border-radius:14px;padding:20px}
+#acceso{max-width:430px;margin:55px auto}label{display:block;margin:14px 0 6px}
+input,select{background:#0c1729;color:#f0f5ff;border:1px solid #506582;border-radius:9px;padding:11px 12px;font:inherit}
+#acceso input{width:100%}button{border:0;background:#317be7;color:white;border-radius:9px;padding:11px 16px;font-weight:650;cursor:pointer}button:disabled{opacity:.6}#salir{background:#354a65}
+#estado{white-space:pre-wrap} .eyebrow{font-size:.77rem;letter-spacing:.08em;text-transform:uppercase;color:#a9b9cf}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:16px 0 25px}
+.dato{min-height:112px}.dato strong{display:block;font-size:1.8rem;margin-top:10px;overflow-wrap:anywhere}.dato small{display:block;color:#b0c0d7;margin-top:7px}
+.section{margin-top:24px}.section .panel{margin-top:12px}.chip{display:inline-flex;align-items:center;border:1px solid #52647c;border-radius:99px;padding:4px 10px;font-size:.78rem;background:#25364d;white-space:nowrap}
+.ok{background:#123c32;color:#a3f2cf;border-color:#2e745d}.warn{background:#4a391e;color:#ffe1a3;border-color:#927038}.neutral{background:#29384e;color:#c6d5e8;border-color:#516580}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.filters input{flex:2;min-width:170px}.filters select{flex:1;min-width:145px}
+.tablewrap{overflow:auto;border:1px solid #344761;border-radius:12px}table{width:100%;border-collapse:collapse;min-width:700px;text-align:left}
+th,td{padding:12px 13px;border-bottom:1px solid #304158;font-size:.88rem}th{background:#1d304c;color:#c6d7ef;position:sticky;top:0}tr:last-child td{border-bottom:0}tbody tr:hover{background:#1c3049}
+.empty{padding:24px;text-align:center;color:#adbed3}.note{line-height:1.5}.foot{margin-top:26px;font-size:.8rem;color:#98aac3}
+@media(max-width:900px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:9px}.dato{padding:13px;min-height:98px}.dato strong{font-size:1.35rem}header{padding:14px 16px}h1{font-size:1.1rem}.filters input,.filters select{flex:1 1 100%}}
 </style>
 </head>
 <body>
 <header><div class="top"><h1>🚌 Monitor de Flota Carlan</h1><button id="salir" class="oculto">Cerrar sesión</button></div></header>
 <main>
-<section id="acceso" class="panel">
-<h2>Acceso autorizado</h2><p class="muted">Ingresá con tu usuario de Firebase.</p>
+<section id="acceso" class="panel"><h2>Acceso autorizado</h2><p class="muted">Ingresá con tu usuario de Firebase.</p>
 <form id="formulario"><label for="correo">Correo electrónico</label><input id="correo" type="email" autocomplete="username" required>
 <label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password" required>
-<button id="entrar" type="submit">Ingresar</button></form><p id="estado" role="status"></p>
-</section>
+<button id="entrar" type="submit">Ingresar</button></form><p id="estado" role="status"></p></section>
 <section id="monitor" class="oculto">
-<h2>Estado de la flota</h2><p class="muted" id="actualizacion">Esperando datos del servidor...</p>
-<div class="resumen"><div class="dato">Último interno revisado<strong id="ultimo">—</strong></div><div class="dato">Colectivos revisados<strong id="completados">—</strong></div><div class="dato">Estado del barrido<strong id="barrido">—</strong></div></div>
-<p class="muted" id="sinDatos">La base todavía no contiene datos del monitor. Primero probaremos la conexión y después sincronizaremos resultados autorizados.</p>
+<div class="between"><div><span class="eyebrow">Panel de operaciones</span><h2 style="margin:6px 0">Estado de la flota</h2><p class="muted small" id="actualizacion" aria-live="polite">Esperando datos del servidor...</p></div><span class="chip" id="conexion">Conectando...</span></div>
+<div class="grid" aria-label="Resumen del barrido">
+<div class="dato"><span class="muted small">Colectivos revisados</span><strong id="completados">—</strong><small>Progreso del barrido</small></div>
+<div class="dato"><span class="muted small">Último interno revisado</span><strong id="ultimo">—</strong><small>Último procesado</small></div>
+<div class="dato"><span class="muted small">Estado del barrido</span><strong id="barrido" style="font-size:1.05rem">—</strong><small>Estado del motor</small></div>
+<div class="dato"><span class="muted small">Internos con detalle</span><strong id="conDetalle">—</strong><small>Registros publicados</small></div>
+</div>
+<div class="section"><h2>Diagnósticos</h2><div class="grid">
+<div class="dato"><span class="muted small">Conectividad confirmada</span><strong id="online">—</strong><small>ONLINE</small></div>
+<div class="dato"><span class="muted small">Conectividad no verificada</span><strong id="sinConexion">—</strong><small>No equivale a desconectado</small></div>
+<div class="dato"><span class="muted small">GPS obtenido</span><strong id="gpsOk">—</strong><small>GPS_OK</small></div>
+<div class="dato"><span class="muted small">Consulta HDD completada</span><strong id="hddOk">—</strong><small>LECTURA_OK, no confirma salud</small></div>
+</div></div>
+<div class="section"><div class="between"><h2>Consulta por colectivo</h2><span id="cantidadFiltrada" class="muted small"></span></div>
+<div class="filters"><input id="buscar" type="search" placeholder="Buscar interno (ej. 5762)" aria-label="Buscar por interno">
+<select id="filtroConexion" aria-label="Filtrar conectividad"><option value="">Toda conectividad</option><option value="ONLINE">ONLINE</option><option value="NO_VERIFICADO">No verificada</option></select>
+<select id="filtroGps" aria-label="Filtrar GPS"><option value="">Todos los GPS</option><option value="GPS_OK">GPS obtenido</option><option value="LOGIN_OK_SIN_GPS">Sin GPS obtenido</option><option value="NO_VERIFICADO">No verificado</option><option value="TIEMPO_AGOTADO">Tiempo agotado</option></select>
+<select id="filtroHdd" aria-label="Filtrar HDD"><option value="">Todos los HDD</option><option value="LECTURA_OK">Consulta completada</option><option value="ERROR_DIAGNOSTICO">Error de diagnóstico</option><option value="NO_VERIFICADO">No verificado</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Interno</th><th>Conectividad</th><th>GPS</th><th>HDD</th><th>Última consulta</th></tr></thead><tbody id="filas"><tr><td colspan="5" class="empty">Esperando registros individuales del servidor.</td></tr></tbody></table></div></div>
+<div class="section panel note"><h3>Cómo interpretar los estados</h3><p class="muted small"><strong>ONLINE</strong> significa que se confirmó inicio de sesión o túnel. <strong>NO_VERIFICADO</strong> no demuestra que el colectivo esté desconectado. <strong>LECTURA_OK</strong> indica que la consulta HDD terminó, pero no confirma por sí sola que el disco esté sano. <strong>ERROR_DIAGNOSTICO</strong> indica una consulta no completada; no debe interpretarse como una falla física del HDD.</p></div>
+<p class="foot">Panel de consulta. Los resultados representan la última información publicada por el servidor y no necesariamente el estado instantáneo de cada equipo.</p>
 </section>
 </main>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-const firebaseConfig = {
- apiKey: "AIzaSyAtw7ozZpqcxUMKZ82gTFTD4lBGheOmiH4",
- authDomain: "monitor-flota-carlan.firebaseapp.com",
- databaseURL: "https://monitor-flota-carlan-default-rtdb.firebaseio.com",
- projectId: "monitor-flota-carlan",
- storageBucket: "monitor-flota-carlan.firebasestorage.app",
- messagingSenderId: "1026239718729",
- appId: "1:1026239718729:web:8cdbe2f7f6c8119b19a698"
-};
-const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getDatabase(app);
-const $=id=>document.getElementById(id);
-let cancelar=null;
-$("formulario").addEventListener("submit",async e=>{
- e.preventDefault(); $("estado").textContent="Ingresando..."; $("entrar").disabled=true;
- try { await signInWithEmailAndPassword(auth,$("correo").value.trim(),$("clave").value); $("clave").value=""; $("estado").textContent=""; }
- catch { $("estado").textContent="No se pudo iniciar sesión. Revisá el correo y la contraseña."; }
- finally { $("entrar").disabled=false; }
-});
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import {getDatabase,ref,onValue} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+const firebaseConfig={apiKey:"AIzaSyAtw7ozZpqcxUMKZ82gTFTD4lBGheOmiH4",authDomain:"monitor-flota-carlan.firebaseapp.com",databaseURL:"https://monitor-flota-carlan-default-rtdb.firebaseio.com",projectId:"monitor-flota-carlan",storageBucket:"monitor-flota-carlan.firebasestorage.app",messagingSenderId:"1026239718729",appId:"1:1026239718729:web:8cdbe2f7f6c8119b19a698"};
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
+let cancelar=null,internos=[];
+const texto=v=>v===null||v===undefined||v===""?"—":String(v);
+function chip(valor,tipo){const el=document.createElement("span");el.className="chip "+tipo;el.textContent=valor;return el}
+function estado(valor,clase){return chip(texto(valor),clase)}
+function pintarFilas(){
+ const q=$("buscar").value.trim().toLowerCase(),c=$("filtroConexion").value,g=$("filtroGps").value,h=$("filtroHdd").value;
+ const vistos=internos.filter(x=>(!q||String(x.interno).toLowerCase().includes(q))&&(!c||x.conectividad===c)&&(!g||x.gps===g)&&(!h||x.hdd===h));
+ $("cantidadFiltrada").textContent=internos.length?vistos.length+" de "+internos.length+" internos":"";
+ const body=$("filas");body.replaceChildren();
+ if(!vistos.length){const tr=document.createElement("tr"),td=document.createElement("td");td.colSpan=5;td.className="empty";td.textContent=internos.length?"No hay internos que coincidan con los filtros.":"Todavía no se publicaron registros individuales.";tr.append(td);body.append(tr);return}
+ for(const x of vistos){const tr=document.createElement("tr"),add=(v,node)=>{const td=document.createElement("td");if(node)td.append(node);else td.textContent=texto(v);tr.append(td)};
+ add(x.interno);add(null,estado(x.conectividad,x.conectividad==="ONLINE"?"ok":"neutral"));
+ add(null,estado(x.gps,x.gps==="GPS_OK"?"ok":"neutral"));
+ add(null,estado(x.hdd,x.hdd==="LECTURA_OK"?"ok":x.hdd==="ERROR_DIAGNOSTICO"?"warn":"neutral"));
+ add(x.fecha_consulta||x.actualizado);body.append(tr)}
+}
+for(const id of ["buscar","filtroConexion","filtroGps","filtroHdd"])$(id).addEventListener("input",pintarFilas);
+function pintar(d){
+ $("ultimo").textContent=texto(d?.ultimo_interno_revisado);
+ $("completados").textContent=d?.completados!=null&&d?.total!=null?d.completados+" / "+d.total:"—";
+ $("barrido").textContent=texto(d?.estado);
+ $("actualizacion").textContent=d?.actualizado?"Última actualización del servidor: "+d.actualizado:"Esperando datos del servidor...";
+ const raw=d?.internos;
+ internos=Array.isArray(raw)?raw.filter(x=>x&&typeof x==="object"):raw&&typeof raw==="object"?Object.entries(raw).filter(([,v])=>v&&typeof v==="object").map(([k,v])=>({...v,interno:v.interno??k})):[];
+ internos.sort((a,b)=>String(a.interno).localeCompare(String(b.interno),"es",{numeric:true}));
+ $("conDetalle").textContent=raw==null?"—":internos.length;
+ const contar=(campo,valor)=>internos.filter(x=>x[campo]===valor).length;
+ const stats=d?.estadisticas||{};
+ for(const [id,key,field,val] of [["online","online","conectividad","ONLINE"],["sinConexion","no_verificado","conectividad","NO_VERIFICADO"],["gpsOk","gps_ok","gps","GPS_OK"],["hddOk","hdd_lectura_ok","hdd","LECTURA_OK"]]){
+  $(id).textContent=raw!=null?contar(field,val):stats[key]??"—";
+ }
+ pintarFilas();
+}
+$("formulario").addEventListener("submit",async e=>{e.preventDefault();$("estado").textContent="Ingresando...";$("entrar").disabled=true;try{await signInWithEmailAndPassword(auth,$("correo").value.trim(),$("clave").value);$("clave").value="";$("estado").textContent=""}catch{$("estado").textContent="No se pudo iniciar sesión. Revisá el correo y la contraseña."}finally{$("entrar").disabled=false}});
 $("salir").addEventListener("click",()=>signOut(auth));
 onAuthStateChanged(auth,user=>{
  if(cancelar){cancelar();cancelar=null}
- $("acceso").classList.toggle("oculto",!!user);
- $("monitor").classList.toggle("oculto",!user);
- $("salir").classList.toggle("oculto",!user);
- if(!user)return;
- cancelar=onValue(ref(db,"monitor"),snapshot=>{
-  const d=snapshot.val();
-  $("sinDatos").classList.toggle("oculto",!!d);
-  $("ultimo").textContent=d?.ultimo_interno_revisado ?? "—";
-  $("completados").textContent=(d?.completados!=null&&d?.total!=null)?d.completados+" / "+d.total:"—";
-  $("barrido").textContent=d?.estado ?? "—";
-  $("actualizacion").textContent=d?.actualizado?"Última actualización: "+d.actualizado:"Esperando datos del servidor...";
- },error=>{
-  $("actualizacion").textContent="No se pudo leer el monitor: "+error.code;
- });
+ $("acceso").classList.toggle("oculto",!!user);$("monitor").classList.toggle("oculto",!user);$("salir").classList.toggle("oculto",!user);
+ if(!user){internos=[];pintar(null);return}
+ $("conexion").textContent="Conectando...";
+ cancelar=onValue(ref(db,"monitor"),snapshot=>{pintar(snapshot.val());$("conexion").textContent="Conectado";$("conexion").className="chip ok"},error=>{$("actualizacion").textContent="No se pudo leer el monitor: "+error.code;$("conexion").textContent="Sin acceso a datos";$("conexion").className="chip warn"});
 });
 </script>
 </body></html>
