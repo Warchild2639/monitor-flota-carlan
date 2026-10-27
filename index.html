@@ -152,7 +152,7 @@ window.fetch=function(input,opts){
   const go=()=>{
    const d=snapshot||{};
    let payload=null;
-   if(path.startsWith("/api/flota"))payload=d.flota||d.colectivos||[];
+   if(path.startsWith("/api/flota"))payload=(d.flota||d.colectivos||[]).map(x=>({...x,interno:String(x.interno??""),linea:String(x.linea??""),camaras:x.camaras||{},fechas_camaras:x.fechas_camaras||{},muestras:x.muestras||[],vigencia:x.vigencia||"SIN DATOS"}));
    else if(path.startsWith("/api/progreso_barrido"))payload=d;
    else if(path.startsWith("/api/hdd"))payload=d.hdd||{};
    else if(path.startsWith("/api/internet"))payload=d.internet||{estado:"VERIFICANDO"};
@@ -1604,7 +1604,7 @@ function mostrar(){
   x.interno.includes(busqueda)&&(
     !linea ||
     (linea==="VARELA"
-      ? (/^5/.test(String(x.linea)) && String(x.linea)!=="514")
+      ? (["507","511","512","513"].includes(String(x.linea)))
       : String(x.linea)===linea)
    )
  );
