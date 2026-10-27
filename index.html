@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Monitor de Flota Carlan</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color-scheme:dark;background:#0b1220;color:#eef4ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}header{background:#152238;padding:20px max(20px,calc((100vw - 980px)/2));border-bottom:1px solid #34455d}
+h1{margin:0;font-size:1.5rem}main{max-width:980px;margin:40px auto;padding:0 20px}.panel{background:#17243a;border:1px solid #34455d;border-radius:14px;padding:24px;max-width:440px}
+label{display:block;margin:16px 0 5px}input{width:100%;padding:12px;background:#0c1729;border:1px solid #54647b;border-radius:8px;color:white;font-size:1rem}
+button{background:#2e78e6;border:0;color:white;padding:12px 18px;border-radius:8px;cursor:pointer;margin-top:20px;font-weight:650}
+button:disabled{opacity:.6}#salir{background:#34455d;margin:0}#estado{margin-top:16px;white-space:pre-wrap}.muted{color:#a9b9cf}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.resumen{display:flex;flex-wrap:wrap;gap:12px;margin:20px 0}
+.dato{background:#17243a;border:1px solid #34455d;border-radius:10px;padding:18px;min-width:160px}
+.dato strong{display:block;font-size:1.6rem;margin-top:6px}.oculto{display:none}
+</style>
+</head>
+<body>
+<header><div class="top"><h1>🚌 Monitor de Flota Carlan</h1><button id="salir" class="oculto">Cerrar sesión</button></div></header>
+<main>
+<section id="acceso" class="panel">
+<h2>Acceso autorizado</h2><p class="muted">Ingresá con tu usuario de Firebase.</p>
+<form id="formulario"><label for="correo">Correo electrónico</label><input id="correo" type="email" autocomplete="username" required>
+<label for="clave">Contraseña</label><input id="clave" type="password" autocomplete="current-password" required>
+<button id="entrar" type="submit">Ingresar</button></form><p id="estado" role="status"></p>
+</section>
+<section id="monitor" class="oculto">
+<h2>Estado de la flota</h2><p class="muted" id="actualizacion">Esperando datos del servidor...</p>
+<div class="resumen"><div class="dato">Último interno revisado<strong id="ultimo">—</strong></div><div class="dato">Colectivos revisados<strong id="completados">—</strong></div><div class="dato">Estado del barrido<strong id="barrido">—</strong></div></div>
+<p class="muted" id="sinDatos">La base todavía no contiene datos del monitor. Primero probaremos la conexión y después sincronizaremos resultados autorizados.</p>
+</section>
+</main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+const firebaseConfig = {
+ apiKey: "AIzaSyAtw7ozZpqcxUMKZ82gTFTD4lBGheOmiH4",
+ authDomain: "monitor-flota-carlan.firebaseapp.com",
+ databaseURL: "https://monitor-flota-carlan-default-rtdb.firebaseio.com",
+ projectId: "monitor-flota-carlan",
+ storageBucket: "monitor-flota-carlan.firebasestorage.app",
+ messagingSenderId: "1026239718729",
+ appId: "1:1026239718729:web:8cdbe2f7f6c8119b19a698"
+};
+const app=initializeApp(firebaseConfig), auth=getAuth(app), db=getDatabase(app);
+const $=id=>document.getElementById(id);
+let cancelar=null;
+$("formulario").addEventListener("submit",async e=>{
+ e.preventDefault(); $("estado").textContent="Ingresando..."; $("entrar").disabled=true;
+ try { await signInWithEmailAndPassword(auth,$("correo").value.trim(),$("clave").value); $("clave").value=""; $("estado").textContent=""; }
+ catch { $("estado").textContent="No se pudo iniciar sesión. Revisá el correo y la contraseña."; }
+ finally { $("entrar").disabled=false; }
+});
+$("salir").addEventListener("click",()=>signOut(auth));
+onAuthStateChanged(auth,user=>{
+ if(cancelar){cancelar();cancelar=null}
+ $("acceso").classList.toggle("oculto",!!user);
+ $("monitor").classList.toggle("oculto",!user);
+ $("salir").classList.toggle("oculto",!user);
+ if(!user)return;
+ cancelar=onValue(ref(db,"monitor"),snapshot=>{
+  const d=snapshot.val();
+  $("sinDatos").classList.toggle("oculto",!!d);
+  $("ultimo").textContent=d?.ultimo_interno_revisado ?? "—";
+  $("completados").textContent=(d?.completados!=null&&d?.total!=null)?d.completados+" / "+d.total:"—";
+  $("barrido").textContent=d?.estado ?? "—";
+  $("actualizacion").textContent=d?.actualizado?"Última actualización: "+d.actualizado:"Esperando datos del servidor...";
+ },error=>{
+  $("actualizacion").textContent="No se pudo leer el monitor: "+error.code;
+ });
+});
+</script>
+</body></html>
