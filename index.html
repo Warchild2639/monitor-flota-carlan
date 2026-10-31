@@ -168,6 +168,88 @@ window.fetch=function(input,opts){
 </script>
 
 
+
+<style>
+/* CARLAN TELEMETRIA F1 - REDISENO 2026 */
+:root{color-scheme:dark;--f1-bg:#080b10;--f1-panel:#10151d;--f1-panel2:#151c25;--f1-line:#29313c;--f1-text:#e8edf3;--f1-muted:#8997a8;--f1-cyan:#34d9cc;--f1-amber:#e9ba62;--f1-red:#f46b75}
+html{scrollbar-color:#394654 #090d13}
+body{background:var(--f1-bg);color:var(--f1-text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;font-size:13px;letter-spacing:.01em}
+body::before{content:"";position:fixed;inset:0 0 auto;height:3px;background:linear-gradient(90deg,#dba950 0%,#32d5ca 50%,#dba950 100%);z-index:10001;pointer-events:none}
+header.cabecera-historial-integrada{background:#0d1219;border-bottom:1px solid #303844;padding:19px clamp(16px,3vw,38px);box-shadow:0 7px 25px #0006;gap:12px}
+header h1{font-size:clamp(19px,2vw,26px);font-weight:800;letter-spacing:.075em;text-transform:uppercase;color:#f2f4f6}
+header h1::before{content:"▰";color:var(--f1-amber);margin-right:10px}
+header p{color:var(--f1-muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+main{max-width:1900px;padding:22px clamp(12px,2.2vw,34px) 44px}
+.resumen{gap:10px;margin-bottom:18px}
+.tarjeta{background:linear-gradient(145deg,#161d26,#0e131a);border:1px solid #2b3540;border-left:3px solid var(--f1-cyan);border-radius:5px;min-width:155px;padding:15px 19px;box-shadow:0 4px 15px #0003}
+.tarjeta:nth-child(2){border-left-color:var(--f1-amber)}
+.tarjeta:nth-child(3){border-left-color:#77889d}
+.numero{font-family:Consolas,"Courier New",monospace;font-size:31px;font-weight:800;letter-spacing:-.035em}
+.etiqueta{color:var(--f1-muted);font-size:10px;text-transform:uppercase;letter-spacing:.11em;margin-top:4px}
+.controles{gap:9px;margin:14px 0}
+input,select,button{background:#141b24;border:1px solid #35404d;border-radius:4px;color:#e8edf3;font-size:12px}
+input:focus-visible,select:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--f1-cyan);outline-offset:2px}
+button{background:#1d303b;transition:background .18s,border-color .18s,transform .18s}
+button:hover{background:#263f4a;border-color:#48b7b0}
+#actualizar{background:#1b625f;border-color:#288d87;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+#buscar{background:#101720;min-width:240px}
+#mensaje{color:#8fa1b1;font-size:11px;letter-spacing:.025em}
+.tabla{border:1px solid #2a333e;border-radius:5px;background:#0d1219;box-shadow:0 12px 32px #0004;overflow:auto}
+table{border-collapse:collapse;font-variant-numeric:tabular-nums}
+.tabla thead{position:sticky;top:0;z-index:2}
+.tabla th{background:#1b242f;color:#9fadb9;padding:12px 11px;font-size:10px;letter-spacing:.11em;text-transform:uppercase;border-bottom:2px solid #b78b49}
+.tabla td{padding:9px 11px;border-top:1px solid #202934;font-size:12px}
+.tabla tbody tr:nth-child(even){background:#101720}
+.tabla tbody tr:hover{background:#1c3038}
+.tabla tbody td:first-child{font-family:Consolas,"Courier New",monospace;font-size:14px;font-weight:800;color:#f1f4f8;border-left:3px solid transparent}
+.tabla tbody tr:hover td:first-child{border-left-color:var(--f1-cyan)}
+.estado,.hdd-etiqueta{border-radius:3px;font-size:10px;font-weight:800;letter-spacing:.045em;text-transform:uppercase;padding:5px 8px}
+.bien,.hdd-ok{background:#103f37;color:#63e6bc;border:1px solid #236e59}
+.mal,.hdd-falla{background:#51252b;color:#ff9da4;border:1px solid #85404a}
+.aviso,.hdd-sin-datos{background:#4d3d20;color:#f4d087;border:1px solid #84642e}
+.neutro,.hdd-pendiente{background:#27313d;color:#b7c5d2;border:1px solid #3b4857}
+.hdd-error{background:#543922;color:#ffbe80;border:1px solid #865a31}
+.hdd-fecha{color:#8292a5}
+main>.barra-empresas{background:#111821!important;border:1px solid #303b46;border-radius:5px;padding:9px;box-shadow:0 8px 20px #0008!important;top:0}
+.barra-empresas .boton-linea{border-radius:3px;min-height:38px;font-family:Consolas,"Courier New",monospace;font-size:13px;letter-spacing:.02em}
+.barra-empresas .boton-linea.activo{border-color:#e5c17c;box-shadow:inset 0 -3px #e5c17c,0 0 0 1px #e5c17c55}
+.barra-empresas .boton-linea.guido{background:#173d63}
+.barra-empresas .boton-linea.sanvicente{background:#12574f}
+.barra-empresas .boton-linea.linea514{background:#745527}
+.barra-empresas .boton-linea.varela{background:#593d78}
+.barra-empresas .boton-linea.todas{background:#374453}
+#centroAlertasV614{background:#101720;border:1px solid #2e3945;border-radius:5px}
+#centroAlertasV614>summary{padding:13px 16px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:#f0cf91}
+#alertasGridV614 .alertaDobleV614{background:#151e28;border:1px solid #303c48;border-radius:4px}
+#alertasGridV614 .alertaDobleV614 strong{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#c4d0dc}
+#alertasGridV614 .alertaDobleV614 button{background:#101720;border-radius:3px}
+#alertasGridV614 .cantidad{font-family:Consolas,"Courier New",monospace}
+.ficha{background:#02050bdc;backdrop-filter:blur(5px)}
+.ficha .panel{background:#101720;border:1px solid #3a4755;border-top:3px solid var(--f1-cyan);border-radius:7px;box-shadow:0 24px 70px #000b;padding:clamp(15px,2.5vw,26px)}
+.ficha .panel h2{font-family:Consolas,"Courier New",monospace;letter-spacing:.025em}
+#indicadoresCompactos{background:#111d26;border:1px solid #30414c;border-radius:5px}
+.indicador-fila{border-bottom-color:#2b3945}
+#historialFichaDesplegable,#detalleFicha,#historicosFicha .historico-tarjeta{background:#131c26;border:1px solid #30404b;border-radius:5px}
+.segmento.bien{background:#28c69d}.segmento.mal{background:#ed5967}.segmento.aviso{background:#e6ae53}
+#carlan-acceso{background:#070b10}
+#carlan-acceso .login{background:#111923;border:1px solid #3a4755;border-top:3px solid var(--f1-amber);border-radius:6px}
+#carlan-acceso button{background:#216e69}
+#carlan-salir{background:#1b2934}
+#carlan-nota{background:#2d271a;border:1px solid #665334;color:#f4d49b;border-radius:4px;font-size:12px}
+#boton-historial{background:#1b2934;border:1px solid #42505e;border-radius:4px}
+#contenido-historial{background:#151e28;color:#e9eff6;border:1px solid #465464;border-radius:5px}
+#contenido-historial .indicador-corte,#grafico-cortes{background:#1d2934}
+#contenido-historial .indicador-corte span,#contenido-historial .historial-subtitulo,#contenido-historial .nota-historial,#contenido-historial .fecha-dia-claro{color:#b0bdcb}
+#contenido-historial .numero-barra-clara{color:#e9eff6}
+#contenido-historial #filtros-historial button{background:#22313e;color:#e9eff6;border-color:#405365}
+#contenido-historial #filtros-historial button.activo{background:#17655e}
+#contenido-historial .evento-historial{border-bottom-color:#354452}
+#contenido-historial .evento-historial small{color:#afbdca}
+#contenido-historial #ver-detalles-cortes{background:#23413f;color:#e9eff6}
+@media(max-width:760px){main{padding:13px 9px 30px}.tabla th{font-size:9px;padding:9px 8px}.tabla td{padding:8px}.resumen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.tarjeta{min-width:0;padding:10px}.numero{font-size:23px}.etiqueta{font-size:9px}.barra-empresas{gap:4px}.barra-empresas .boton-linea{min-width:48px;padding:8px 5px;font-size:11px}header.cabecera-historial-integrada{padding:16px 12px}}
+@media(max-width:420px){.resumen{grid-template-columns:repeat(2,minmax(0,1fr))}.controles #buscar{min-width:0;flex:1}.ficha .panel{max-height:94vh}}
+</style>
+
 </head>
 <body>
 <div id="carlan-acceso"><div class="login"><h2>🚌 Monitor de Flota Carlan</h2><p>Acceso autorizado</p><form id="carlan-form"><input id="carlan-email" type="email" placeholder="Correo electrónico" autocomplete="username" required><input id="carlan-password" type="password" placeholder="Contraseña" autocomplete="current-password" required><button type="submit">Ingresar</button></form><p id="carlan-error" role="status">Comprobando sesión...</p></div></div>
